@@ -18,7 +18,7 @@ type User struct {
 	CountryCode  string `xorm:"varchar(6)" json:"countryCode"`
 	WxResp       string `xorm:"varchar(100)" json:"wx_resp,omitempty"`
 	WxOpenid     string `xorm:"varchar(100)" json:"WxOpenid,omitempty"`
-	WxUnionId    string `xorm:"varchar(100)" json:"WxUnionId,omitempty"`
+	WxUnionid    string `xorm:"varchar(100)" json:"WxUnionId,omitempty"`
 }
 
 type Userinfo struct {

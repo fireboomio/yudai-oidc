@@ -20,7 +20,7 @@ type TokenRes struct {
 
 type Token struct {
 	UserId     string    `xorm:"varchar(255)" json:"userId"`
-	Token      string    `xorm:"varchar(255)" json:"userId"`
+	Token      string    `xorm:"varchar(255)" json:"token"`
 	ExpireTime time.Time `xorm:"varchar(100)" json:"expire_time"`
 	FlushTime  time.Time `xorm:"varchar(100)" json:"flush_time"`
 	Banned     bool      `xorm:"bool" json:"banned"`

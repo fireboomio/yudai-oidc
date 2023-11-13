@@ -28,7 +28,7 @@ func NewRouter() *echo.Echo {
 
 	// Middleware
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
+		Format: "method=${method}, uri=${uri}, status=${status}, error=${error}\n",
 	}))
 	e.Use(middleware.Recover())
 
