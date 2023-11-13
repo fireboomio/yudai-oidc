@@ -7,8 +7,15 @@ import (
 )
 
 type multipleConfig struct {
-	*MySQLConfig `mapstructure:"mysql"`
+	MySQLConfig   *MySQLConfig   `mapstructure:"mysql"`
+	WxLoginConfig *WxLoginConfig `mapstructure:"wxlogin"`
 }
+
+type WxLoginConfig struct {
+	Appid  string `mapstructure:"appid"`
+	Secret string `mapstructure:"secret"`
+}
+
 type MySQLConfig struct {
 	Host         string `mapstructure:"host"`
 	User         string `mapstructure:"user"`

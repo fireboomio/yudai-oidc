@@ -16,9 +16,9 @@ type User struct {
 	PasswordType string `xorm:"varchar(100)" json:"passwordType"`
 	Phone        string `xorm:"varchar(20) index" json:"phone,omitempty"`
 	CountryCode  string `xorm:"varchar(6)" json:"countryCode"`
-	WxResp       string `xorm:"varchar(100)" json:"wx_resp,omitempty"`
-	WxOpenid     string `xorm:"varchar(100)" json:"WxOpenid,omitempty"`
 	WxUnionid    string `xorm:"varchar(100)" json:"WxUnionId,omitempty"`
+
+	WxResp map[string]any `json:"-"`
 }
 
 type Userinfo struct {
@@ -72,31 +72,12 @@ func GetUserByPhone(phone string) (*User, bool, error) {
 	}
 }
 
-func GetUserByWxResp(WxResp string) (*User, error) {
-	if WxResp == "" {
+func GetUserByWxUnionid(unionid string) (*User, error) {
+	if unionid == "" {
 		return nil, nil
 	}
 
-	user := User{WxResp: WxResp}
-	existed, err := adapter.Engine.Get(&user)
-	if err != nil {
-		return nil, err
-	}
-
-	if existed {
-		return &user, nil
-	} else {
-		return nil, nil
-	}
-
-}
-
-func GetUserByWxOpenid(openid string) (*User, error) {
-	if openid == "" {
-		return nil, nil
-	}
-
-	user := User{WxOpenid: openid}
+	user := User{WxUnionid: unionid}
 	existed, err := adapter.Engine.Get(&user)
 	if err != nil {
 		return nil, err

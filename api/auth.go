@@ -16,15 +16,12 @@ type (
 		login func(authForm *AuthForm) (user *object.User, err error)
 	}
 	AuthForm struct {
-		LoginType       string `json:"loginType"`
-		Username        string `json:"username,omitempty"`
-		Password        string `json:"password,omitempty"`
-		Phone           string `json:"phone,omitempty"`
-		Code            string `json:"code,omitempty"`
-		CountryCode     string `json:"countryCode,omitempty"`
-		MiniProGramCode string `json:"miniProGramCode,omitempty"`
-		AppId           string `json:"appId,omitempty"`
-		Secret          string `json:"secret,omitempty"`
+		LoginType   string `json:"loginType"`
+		Username    string `json:"username,omitempty"`
+		Password    string `json:"password,omitempty"`
+		Phone       string `json:"phone,omitempty"`
+		Code        string `json:"code,omitempty"`
+		CountryCode string `json:"countryCode,omitempty"`
 	}
 	UserResponse struct {
 		Success bool             `json:"success"`
