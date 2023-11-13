@@ -6,7 +6,9 @@ import (
 )
 
 const (
-	oauth2    = "oauth2"
+	oauth2Pc  = "oauth2_pc"
+	oauth2H5  = "oauth2_h5"
+	oauth2App = "oauth2_app"
 	oauth2Url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"
 )
 
@@ -21,7 +23,7 @@ type oauthResp struct {
 }
 
 func init() {
-	loginActions[oauth2] = &loginAction{
+	oauth2Action := &loginAction{
 		url: oauth2Url,
 		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
 			var resp oauthResp
@@ -41,9 +43,16 @@ func init() {
 			return
 		},
 	}
-	authActionMap[oauth2] = &authAction{
-		login: func(authForm *AuthForm) (user *object.User, err error) {
-			return loginWx(oauth2, authForm.Code)
-		},
+	loginActions[oauth2Pc] = oauth2Action
+	loginActions[oauth2H5] = oauth2Action
+	loginActions[oauth2App] = oauth2Action
+	authActionMap[oauth2Pc] = func(authForm *AuthForm) (user *object.User, err error) {
+		return loginWx(oauth2Pc, authForm.Code)
+	}
+	authActionMap[oauth2H5] = func(authForm *AuthForm) (user *object.User, err error) {
+		return loginWx(oauth2H5, authForm.Code)
+	}
+	authActionMap[oauth2App] = func(authForm *AuthForm) (user *object.User, err error) {
+		return loginWx(oauth2App, authForm.Code)
 	}
 }

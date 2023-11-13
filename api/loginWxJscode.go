@@ -35,9 +35,7 @@ func init() {
 			return
 		},
 	}
-	authActionMap[jscode] = &authAction{
-		login: func(authForm *AuthForm) (user *object.User, err error) {
-			return loginWx(jscode, authForm.Code)
-		},
+	authActionMap[jscode] = func(authForm *AuthForm) (user *object.User, err error) {
+		return loginWx(jscode, authForm.Code)
 	}
 }

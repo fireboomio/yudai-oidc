@@ -8,14 +8,12 @@ import (
 )
 
 var (
-	authActionMap map[string]*authAction
+	authActionMap map[string]authAction
 )
 
 type (
-	authAction struct {
-		login func(authForm *AuthForm) (user *object.User, err error)
-	}
-	AuthForm struct {
+	authAction func(authForm *AuthForm) (user *object.User, err error)
+	AuthForm   struct {
 		LoginType   string `json:"loginType"`
 		Username    string `json:"username,omitempty"`
 		Password    string `json:"password,omitempty"`
@@ -32,7 +30,7 @@ type (
 )
 
 func init() {
-	authActionMap = make(map[string]*authAction, 0)
+	authActionMap = make(map[string]authAction, 0)
 }
 
 // Login ...
@@ -63,7 +61,7 @@ func Login(c echo.Context) (err error) {
 
 	var user *object.User
 
-	user, err = authActionMap[authForm.LoginType].login(authForm)
+	user, err = authActionMap[authForm.LoginType](authForm)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, object.Response{
 			Msg:  err.Error(),
