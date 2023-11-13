@@ -70,7 +70,6 @@ func UpdateUser(c echo.Context) (err error) {
 	var user object.User
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, object.Response{
-
 			Msg: err.Error(),
 		})
 	}
@@ -89,6 +88,22 @@ func UpdateUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, object.Response{
 			Msg: msg,
 		})
+	}
+
+	if smsCode := c.QueryParam("smsCode"); len(smsCode) > 0 {
+		checkPhone, ok := util.GetE164Number(user.Phone, user.CountryCode)
+		if !ok {
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: fmt.Sprintf("verification:Phone %s is invalid in your region %s", user.Phone, user.CountryCode),
+			})
+		}
+
+		checkResult := object.CheckSignInCode(checkPhone, smsCode)
+		if len(checkResult) > 0 {
+			return c.JSON(http.StatusBadRequest, object.Response{Msg: checkResult})
+		}
+
+		_ = object.DisableVerificationCode(checkPhone)
 	}
 
 	affected, err := object.UpdateUser(&user)
