@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	oauth2Pc  = "oauth2_pc"
-	oauth2H5  = "oauth2_h5"
-	oauth2App = "oauth2_app"
+	oauth2Pc  = "pc"
+	oauth2H5  = "h5"
+	oauth2App = "app"
 	oauth2Url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"
 )
 
@@ -23,29 +23,44 @@ type oauthResp struct {
 }
 
 func init() {
-	oauth2Action := &loginAction{
-		url: oauth2Url,
-		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
-			var resp oauthResp
-			if err = json.Unmarshal(bytes, &resp); err != nil {
-				return
-			}
-
-			result = &loginActionResult{
-				unionid: resp.UnionId,
-				openid:  resp.Openid,
-				data: map[string]any{
-					"access_token":  resp.AccessToken,
-					"refresh_token": resp.RefreshToken,
-					"expires_in":    resp.ExpiresIn,
-				},
-			}
+	respHandle := func(bytes []byte) (result *loginActionResult, err error) {
+		var resp oauthResp
+		if err = json.Unmarshal(bytes, &resp); err != nil {
 			return
+		}
+
+		result = &loginActionResult{
+			unionid: resp.UnionId,
+			openid:  resp.Openid,
+			data: map[string]any{
+				"access_token":  resp.AccessToken,
+				"refresh_token": resp.RefreshToken,
+				"expires_in":    resp.ExpiresIn,
+			},
+		}
+		return
+	}
+	loginActions[oauth2Pc] = &loginAction{
+		url:        oauth2Url,
+		respHandle: respHandle,
+		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
+			return config.Pc
 		},
 	}
-	loginActions[oauth2Pc] = oauth2Action
-	loginActions[oauth2H5] = oauth2Action
-	loginActions[oauth2App] = oauth2Action
+	loginActions[oauth2H5] = &loginAction{
+		url:        oauth2Url,
+		respHandle: respHandle,
+		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
+			return config.H5
+		},
+	}
+	loginActions[oauth2App] = &loginAction{
+		url:        oauth2Url,
+		respHandle: respHandle,
+		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
+			return config.App
+		},
+	}
 	authActionMap[oauth2Pc] = func(authForm *AuthForm) (user *object.User, err error) {
 		return loginWx(oauth2Pc, authForm.Code)
 	}

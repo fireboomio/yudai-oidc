@@ -7,5 +7,15 @@ mysql:
   max_open_conns: 200
   max_idle_conns: 50
 wxlogin:
-  appid: "appid"
-  secret: "secret"
+  h5:
+    appid: "appid"
+    secret: "secret"
+  pc:
+    appid: "appid"
+    secret: "secret"
+  app:
+    appid: "appid"
+    secret: "secret"
+  mini:
+    appid: "appid"
+    secret: "secret"

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	jscode    = "jscode"
+	mini      = "mini"
 	jscodeUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code"
 )
 
@@ -17,8 +17,11 @@ type jscodeResp struct {
 }
 
 func init() {
-	loginActions[jscode] = &loginAction{
+	loginActions[mini] = &loginAction{
 		url: jscodeUrl,
+		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
+			return config.Mini
+		},
 		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
 			var resp jscodeResp
 			if err = json.Unmarshal(bytes, &resp); err != nil {
@@ -35,7 +38,7 @@ func init() {
 			return
 		},
 	}
-	authActionMap[jscode] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginWx(jscode, authForm.Code)
+	authActionMap[mini] = func(authForm *AuthForm) (user *object.User, err error) {
+		return loginWx(mini, authForm.Code)
 	}
 }

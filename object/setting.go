@@ -11,10 +11,18 @@ type multipleConfig struct {
 	WxLoginConfig *WxLoginConfig `mapstructure:"wxlogin"`
 }
 
-type WxLoginConfig struct {
-	Appid  string `mapstructure:"appid"`
-	Secret string `mapstructure:"secret"`
-}
+type (
+	WxLoginConfig struct {
+		H5   *WxLoginDetail `mapstructure:"h5"`
+		Pc   *WxLoginDetail `mapstructure:"pc"`
+		App  *WxLoginDetail `mapstructure:"app"`
+		Mini *WxLoginDetail `mapstructure:"mini"`
+	}
+	WxLoginDetail struct {
+		Appid  string `mapstructure:"appid"`
+		Secret string `mapstructure:"secret"`
+	}
+)
 
 type MySQLConfig struct {
 	Host         string `mapstructure:"host"`
