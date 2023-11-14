@@ -7,7 +7,8 @@ import (
 )
 
 type Userinfo struct {
-	Sub string `json:"sub"`
+	Sub string           `json:"sub"`
+	Wxs []*object.UserWx `json:"wxs"`
 }
 
 func GetJwks(c echo.Context) (err error) {
@@ -31,6 +32,7 @@ func GetUserInfo(c echo.Context) (err error) {
 	userinfo := &Userinfo{
 		Sub: user.UserId,
 	}
+	userinfo.Wxs, _ = object.GetUserWxsByUnionid(user.WxUnionid)
 	return c.JSON(200, userinfo)
 }
 

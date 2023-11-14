@@ -42,3 +42,12 @@ func GetUserWxByOpenid(openid, platform string) (*UserWx, bool, error) {
 		return nil, false, nil
 	}
 }
+
+func GetUserWxsByUnionid(unionid string) (data []*UserWx, err error) {
+	if len(unionid) == 0 {
+		return
+	}
+
+	_, err = adapter.Engine.Where("unionid=?", unionid).Get(&data)
+	return
+}
