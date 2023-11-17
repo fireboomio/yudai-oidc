@@ -77,11 +77,11 @@ func UpdateUser(c echo.Context) (err error) {
 		user.CountryCode = "CN"
 	}
 
-	if user.PasswordType == "" {
+	if len(user.Password) > 0 {
 		user.PasswordType = "md5"
+		user.PasswordSalt = util.RandomString(12)
+		user.Password = util.GenMd5(user.PasswordSalt, user.Password)
 	}
-	user.PasswordSalt = util.RandomString(12)
-	user.Password = util.GenMd5(user.PasswordSalt, user.Password)
 
 	msg := checkUsername(user.Name)
 	if msg != "" {

@@ -68,6 +68,5 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 	}
 
 	_, _ = object.AddUserWx(&object.UserWx{Platform: actionType, Unionid: result.unionid, Openid: result.openid})
-	user.WxResp = result.data
 	return
 }

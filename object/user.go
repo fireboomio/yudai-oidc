@@ -17,8 +17,6 @@ type User struct {
 	Phone        string `xorm:"varchar(20) index" json:"phone,omitempty"`
 	CountryCode  string `xorm:"varchar(6)" json:"countryCode"`
 	WxUnionid    string `xorm:"varchar(100)" json:"WxUnionId,omitempty"`
-
-	WxResp map[string]any `json:"-"`
 }
 
 type Userinfo struct {
@@ -30,6 +28,9 @@ func AddUser(user *User) (int64, error) {
 	var err error
 	if user.UserId == "" {
 		user.UserId = uuid.NewString()
+	}
+	if user.CreatedAt.IsZero() {
+		user.CreatedAt = time.Now()
 	}
 
 	affected, err := adapter.Engine.Insert(user)

@@ -17,6 +17,7 @@ func AddUserWx(userWx *UserWx) (int64, error) {
 		return 0, err
 	}
 
+	userWx.CreatedAt = time.Now()
 	affected, err := adapter.Engine.Insert(userWx)
 	if err != nil {
 		return 0, err

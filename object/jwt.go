@@ -61,10 +61,6 @@ func GenerateToken(user *User) (res *TokenRes, err error) {
 	}
 
 	token.Header["kid"] = "fireboom"
-	for k, v := range user.WxResp {
-		token.Header[k] = v
-	}
-
 	tokenString, err := token.SignedString(key)
 	if err != nil {
 		return
