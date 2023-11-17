@@ -52,6 +52,11 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
+	if len(result.unionid) == 0 {
+		err = errors.New("请先绑定微信开放平台")
+		return
+	}
+
 	user, err = object.GetUserByWxUnionid(result.unionid)
 	if err != nil {
 		return
