@@ -113,14 +113,8 @@ func UpdateUser(c echo.Context) (err error) {
 		})
 	}
 
-	if affected == 0 {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: "none modified",
-		})
-	}
-
 	return c.JSON(http.StatusOK, object.Response{
-		Code: http.StatusOK,
+		Msg: fmt.Sprintf("affected:%d ", affected),
 	})
 
 }
