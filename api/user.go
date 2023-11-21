@@ -83,11 +83,12 @@ func UpdateUser(c echo.Context) (err error) {
 		user.Password = util.GenMd5(user.PasswordSalt, user.Password)
 	}
 
-	msg := checkUsername(user.Name)
-	if msg != "" {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: msg,
-		})
+	if user.Name != "" {
+		if msg := checkUsername(user.Name); len(msg) > 0 {
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: msg,
+			})
+		}
 	}
 
 	if smsCode := c.QueryParam("smsCode"); len(smsCode) > 0 {
