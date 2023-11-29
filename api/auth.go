@@ -112,7 +112,7 @@ func RefreshToken(c echo.Context) (err error) {
 
 	refreshToken, exist := jsonInput["refresh_token"]
 	if !exist {
-		return c.JSON(400, object.Response{
+		return c.JSON(http.StatusBadRequest, object.Response{
 			Msg: "refresh-token不存在",
 		})
 	}

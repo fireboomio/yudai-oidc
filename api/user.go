@@ -62,7 +62,8 @@ func AddUser(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, object.Response{
-		Msg: fmt.Sprintf("affected:%d ", affected),
+		Code: http.StatusOK,
+		Msg:  fmt.Sprintf("affected:%d ", affected),
 	})
 }
 
@@ -91,6 +92,14 @@ func UpdateUser(c echo.Context) (err error) {
 		}
 	}
 
+	if len(user.Phone) > 0 {
+		if _, existed, _ := object.GetUserByPhone(user.Phone); existed && len(user.WxUnionid) > 0 {
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: "手机号码已被使用，请更换手机号码！",
+			})
+		}
+	}
+
 	if smsCode := c.QueryParam("smsCode"); len(smsCode) > 0 {
 		checkPhone, ok := util.GetE164Number(user.Phone, user.CountryCode)
 		if !ok {
@@ -115,7 +124,8 @@ func UpdateUser(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, object.Response{
-		Msg: fmt.Sprintf("affected:%d ", affected),
+		Code: http.StatusOK,
+		Msg:  fmt.Sprintf("affected:%d ", affected),
 	})
 
 }
@@ -157,5 +167,6 @@ func IsUserExists(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, UserResponse{
 		Msg:     "success",
 		Success: exist,
+		Code:    http.StatusOK,
 	})
 }
