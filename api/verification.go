@@ -26,9 +26,8 @@ type VerificationForm struct {
 func SendVerificationCode(c echo.Context) (err error) {
 	var vForm VerificationForm
 	if err := c.Bind(&vForm); err != nil {
-		return c.JSON(http.StatusBadRequest, object.CodeResponse{
-			Errors:   []object.Res{{Message: err.Error()}},
-			Response: object.Response{},
+		return c.JSON(http.StatusBadRequest, object.Response{
+			Msg: err.Error(),
 		})
 	}
 	if vForm.CountryCode == "" {
@@ -44,8 +43,8 @@ func SendVerificationCode(c echo.Context) (err error) {
 		user.Phone = vForm.Dest
 
 		if user.Phone == "" {
-			return c.JSON(http.StatusBadRequest, object.CodeResponse{
-				Response: object.Response{Msg: "用户手机号未设置"},
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: "用户手机号未设置",
 			})
 		}
 		if user.CountryCode == "" {
@@ -64,17 +63,16 @@ func SendVerificationCode(c echo.Context) (err error) {
 		user.Password = util.GenMd5(user.PasswordSalt, user.Password)
 		msg := checkUsername(user.Name)
 		if msg != "" {
-			return c.JSON(http.StatusBadRequest, object.CodeResponse{
-				Response: object.Response{Msg: msg},
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: msg,
 			})
 		}
 
 		user.CreatedAt = time.Now()
 		_, err := object.AddUser(user)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, object.CodeResponse{
-				Errors:   []object.Res{{Message: err.Error()}},
-				Response: object.Response{},
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: err.Error(),
 			})
 		}
 	}
@@ -82,29 +80,25 @@ func SendVerificationCode(c echo.Context) (err error) {
 	// 获取短信提供商
 	provider, err := object.GetProvider("fireboom/provider_sms")
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, object.CodeResponse{
-			Errors:   []object.Res{{Message: err.Error()}},
-			Response: object.Response{Msg: fmt.Sprintf("您所在地区:%s的电话号码无效", vForm.CountryCode)},
+		return c.JSON(http.StatusBadRequest, object.Response{
+			Msg: fmt.Sprintf("您所在地区:%s的电话号码无效", vForm.CountryCode),
 		})
 
 	}
 
 	if phone, ok := util.GetE164Number(vForm.Dest, vForm.CountryCode); !ok {
-		return c.JSON(http.StatusBadRequest, object.CodeResponse{
-			Response: object.Response{Msg: fmt.Sprintf("您所在地区:%s的电话号码无效", vForm.CountryCode)},
+		return c.JSON(http.StatusBadRequest, object.Response{
+			Msg: fmt.Sprintf("您所在地区:%s的电话号码无效", vForm.CountryCode),
 		})
 	} else {
 		remoteAddr := util.GetIPFromRequest(c.Request())
 		err := object.SendVerificationCodeToPhone(user, provider, remoteAddr, phone)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, object.CodeResponse{
-				Errors:   []object.Res{{Message: err.Error()}},
-				Response: object.Response{},
+			return c.JSON(http.StatusBadRequest, object.Response{
+				Msg: err.Error(),
 			})
 		}
 
-		return c.JSON(http.StatusOK, object.CodeResponse{
-			Response: object.Response{Msg: "ok", Code: http.StatusOK},
-		})
+		return c.JSON(http.StatusOK, object.Response{Msg: "ok", Code: http.StatusOK})
 	}
 }
