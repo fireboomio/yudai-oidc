@@ -87,13 +87,16 @@ func Authorize(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, "please login first")
 		}
 
-		claims, err := object.ParseToken(formatToken(header))
-
+		tokenString := formatToken(header)
+		claims, err := object.ParseToken(tokenString)
 		if err != nil || claims == nil {
 			// 验证不通过，不再调用后续的函数处理
 			return c.JSON(http.StatusUnauthorized, err.Error())
 		}
 
+		if err = object.ValidateToken(tokenString); err != nil {
+			return c.JSON(http.StatusUnauthorized, err.Error())
+		}
 		c.Set("user", claims.User)
 		log.Printf("访问鉴权：{%s}", claims.User.Name)
 

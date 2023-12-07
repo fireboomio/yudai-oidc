@@ -142,19 +142,23 @@ func ParseToken(token string) (*Claims, error) {
 		return nil, errors.New("expected point of Claims, but not found")
 	}
 
+	return claims, nil
+}
+
+func ValidateToken(token string) error {
 	adminToken := &Token{Token: token}
 	exist, err := adapter.Engine.Get(adminToken)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !exist {
-		return nil, errors.New("token not exist")
+		return errors.New("token not exist")
 	}
 	if adminToken.Banned {
-		return nil, errors.New("token banned")
+		return errors.New("token banned")
 	}
 	if adminToken.ExpireTime.Before(time.Now()) {
-		return nil, errors.New("token expired")
+		return errors.New("token expired")
 	}
-	return claims, nil
+	return nil
 }
