@@ -88,15 +88,14 @@ func Authorize(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		tokenString := formatToken(header)
-		claims, err := object.ParseToken(tokenString)
+		claims, err := object.ParseToken(tokenString, func() *object.Token {
+			return &object.Token{Token: tokenString}
+		})
 		if err != nil || claims == nil {
 			// 验证不通过，不再调用后续的函数处理
 			return c.JSON(http.StatusUnauthorized, err.Error())
 		}
 
-		if err = object.ValidateToken(tokenString); err != nil {
-			return c.JSON(http.StatusUnauthorized, err.Error())
-		}
 		c.Set("user", claims.User)
 		log.Printf("访问鉴权：{%s}", claims.User.Name)
 

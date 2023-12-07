@@ -121,7 +121,9 @@ func RefreshToken(c echo.Context) (err error) {
 		})
 	}
 
-	claims, err := object.ParseToken(jsonInput.RefreshToken)
+	claims, err := object.ParseToken(jsonInput.RefreshToken, func() *object.Token {
+		return &object.Token{RefreshToken: jsonInput.RefreshToken}
+	})
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, object.Response{
 			Msg: "token解析错误，请重新登录",

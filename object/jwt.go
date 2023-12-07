@@ -25,18 +25,19 @@ type PlatformConfig struct {
 }
 
 type Token struct {
-	Platform   string    `xorm:"varchar(36)" json:"platform"`
-	UserId     string    `xorm:"varchar(255)" json:"userId"`
-	Token      string    `xorm:"varchar(255)" json:"token"`
-	ExpireTime time.Time `xorm:"varchar(100)" json:"expire_time"`
-	FlushTime  time.Time `xorm:"varchar(100)" json:"flush_time"`
-	Banned     bool      `xorm:"bool" json:"banned"`
+	Platform          string    `xorm:"varchar(36)" json:"platform"`
+	UserId            string    `xorm:"varchar(255)" json:"userId"`
+	Token             string    `xorm:"varchar(255)" json:"token"`
+	ExpireTime        time.Time `xorm:"varchar(100)" json:"expire_time"`
+	RefreshToken      string    `xorm:"varchar(255)" json:"refresh_token"`
+	RefreshExpireTime time.Time `xorm:"varchar(100)" json:"refresh_expire_time"`
+	Banned            bool      `xorm:"bool" json:"banned"`
 }
 
 func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err error) {
 	// Create the Claims
 	nowTime := time.Now()
-	expireAt := nowTime.Add(120 * time.Hour)
+	accessExpireAt := nowTime.Add(24 * time.Hour)
 
 	claims := Claims{
 		User:      user,
@@ -45,14 +46,14 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 			Subject:   user.UserId,
 			NotBefore: jwt.NewNumericDate(nowTime),
 			IssuedAt:  jwt.NewNumericDate(nowTime),
-			ExpiresAt: jwt.NewNumericDate(expireAt),
+			ExpiresAt: jwt.NewNumericDate(accessExpireAt),
 			Issuer:    "fireboom",
 		},
 	}
 
 	var token *jwt.Token
 	var refreshToken *jwt.Token
-	refreshExpireTime := nowTime.Add(24 * time.Hour)
+	refreshExpireTime := nowTime.Add(7 * 24 * time.Hour)
 
 	token = jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
@@ -76,12 +77,13 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	refreshTokenString, err := refreshToken.SignedString(key)
 
 	at := &Token{
-		UserId:     user.UserId,
-		Token:      tokenString,
-		ExpireTime: expireAt,
-		FlushTime:  refreshExpireTime,
-		Banned:     false,
-		Platform:   platform.Platform,
+		Platform:          platform.Platform,
+		UserId:            user.UserId,
+		Token:             tokenString,
+		ExpireTime:        accessExpireAt,
+		RefreshToken:      refreshTokenString,
+		RefreshExpireTime: refreshExpireTime,
+		Banned:            false,
 	}
 
 	adminToken := &Token{Token: tokenString}
@@ -107,7 +109,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 			Where("platform=? and expire_time>?", platform.Platform, nowTime.Format(time.DateTime)).
 			In("user_id", userIds).
 			NotIn("token", []string{tokenString}).
-			Update(&Token{ExpireTime: nowTime}); err != nil {
+			Update(&Token{Banned: true}); err != nil {
 			return
 		}
 	}
@@ -115,11 +117,11 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	return &TokenRes{
 		AccessToken:  tokenString,
 		RefreshToken: refreshTokenString,
-		ExpireIn:     expireAt.Unix(),
+		ExpireIn:     accessExpireAt.Unix(),
 	}, err
 }
 
-func ParseToken(token string) (*Claims, error) {
+func ParseToken(token string, beanFetch func() *Token) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -142,23 +144,23 @@ func ParseToken(token string) (*Claims, error) {
 		return nil, errors.New("expected point of Claims, but not found")
 	}
 
-	return claims, nil
+	if claims.ExpiresAt.Before(time.Now()) {
+		return nil, errors.New("token expired")
+	}
+
+	return claims, validateToken(beanFetch())
 }
 
-func ValidateToken(token string) error {
-	adminToken := &Token{Token: token}
-	exist, err := adapter.Engine.Get(adminToken)
+func validateToken(tokenBean *Token) error {
+	exist, err := adapter.Engine.Get(tokenBean)
 	if err != nil {
 		return err
 	}
 	if !exist {
 		return errors.New("token not exist")
 	}
-	if adminToken.Banned {
+	if tokenBean.Banned {
 		return errors.New("token banned")
-	}
-	if adminToken.ExpireTime.Before(time.Now()) {
-		return errors.New("token expired")
 	}
 	return nil
 }
