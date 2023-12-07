@@ -37,7 +37,7 @@ type Token struct {
 func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err error) {
 	// Create the Claims
 	nowTime := time.Now()
-	accessExpireAt := nowTime.Add(24 * time.Hour)
+	expireAt := nowTime.Add(24 * time.Hour)
 
 	claims := Claims{
 		User:      user,
@@ -46,7 +46,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 			Subject:   user.UserId,
 			NotBefore: jwt.NewNumericDate(nowTime),
 			IssuedAt:  jwt.NewNumericDate(nowTime),
-			ExpiresAt: jwt.NewNumericDate(accessExpireAt),
+			ExpiresAt: jwt.NewNumericDate(expireAt),
 			Issuer:    "fireboom",
 		},
 	}
@@ -80,7 +80,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 		Platform:          platform.Platform,
 		UserId:            user.UserId,
 		Token:             tokenString,
-		ExpireTime:        accessExpireAt,
+		ExpireTime:        expireAt,
 		RefreshToken:      refreshTokenString,
 		RefreshExpireTime: refreshExpireTime,
 		Banned:            false,
@@ -106,8 +106,9 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 			userIds = append(userIds, v.UserId)
 		}
 		if _, err = adapter.Engine.
-			Where("platform=? and expire_time>?", platform.Platform, nowTime.Format(time.DateTime)).
+			Where("banned=0 and expire_time>?", nowTime.Format(time.DateTime)).
 			In("user_id", userIds).
+			In("platform", []string{"", platform.Platform}).
 			NotIn("token", []string{tokenString}).
 			Update(&Token{Banned: true}); err != nil {
 			return
@@ -117,7 +118,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	return &TokenRes{
 		AccessToken:  tokenString,
 		RefreshToken: refreshTokenString,
-		ExpireIn:     accessExpireAt.Unix(),
+		ExpireIn:     expireAt.Unix(),
 	}, err
 }
 
