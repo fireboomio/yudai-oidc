@@ -49,6 +49,6 @@ func GetUserWxsByUnionid(unionid string) (data []*UserWx, err error) {
 		return
 	}
 
-	err = adapter.Engine.Table("UserWx").Where("unionid=?", unionid).Find(&data)
+	err = adapter.Engine.Where("unionid=?", unionid).Find(&data)
 	return
 }

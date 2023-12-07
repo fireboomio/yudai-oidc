@@ -1,6 +1,7 @@
 package object
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
@@ -18,7 +19,13 @@ type TokenRes struct {
 	ExpireIn     int64  `json:"expireIn"`
 }
 
+type PlatformConfig struct {
+	Platform  string `json:"platform"`
+	Exclusive bool   `json:"exclusive"`
+}
+
 type Token struct {
+	Platform   string    `xorm:"varchar(36)" json:"platform"`
 	UserId     string    `xorm:"varchar(255)" json:"userId"`
 	Token      string    `xorm:"varchar(255)" json:"token"`
 	ExpireTime time.Time `xorm:"varchar(100)" json:"expire_time"`
@@ -26,7 +33,7 @@ type Token struct {
 	Banned     bool      `xorm:"bool" json:"banned"`
 }
 
-func GenerateToken(user *User) (res *TokenRes, err error) {
+func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err error) {
 	// Create the Claims
 	nowTime := time.Now()
 	expireAt := nowTime.Add(120 * time.Hour)
@@ -74,18 +81,34 @@ func GenerateToken(user *User) (res *TokenRes, err error) {
 		ExpireTime: expireAt,
 		FlushTime:  refreshExpireTime,
 		Banned:     false,
+		Platform:   platform.Platform,
 	}
 
-	admin_token := &Token{Token: tokenString}
-	exist, err := adapter.Engine.Get(admin_token)
+	adminToken := &Token{Token: tokenString}
+	exist, err := adapter.Engine.Get(adminToken)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	if !exist {
-		_, err = adapter.Engine.Insert(at)
-		if err != nil {
-			return nil, err
+		if _, err = adapter.Engine.Insert(at); err != nil {
+			return
+		}
+	}
+
+	if platform.Exclusive {
+		var samePhoneUsers []*User
+		_ = adapter.Engine.Where("phone=?", user.Phone).Find(&samePhoneUsers)
+		var userIds []string
+		for _, v := range samePhoneUsers {
+			userIds = append(userIds, v.UserId)
+		}
+		if _, err = adapter.Engine.
+			Where("platform=? and expire_time>?", platform.Platform, nowTime.Format(time.DateTime)).
+			In("user_id", userIds).
+			NotIn("token", []string{tokenString}).
+			Update(&Token{ExpireTime: nowTime}); err != nil {
+			return
 		}
 	}
 
@@ -110,12 +133,28 @@ func ParseToken(token string) (*Claims, error) {
 
 		return certificate, nil
 	})
-
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-			return claims, nil
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, err
+	claims, ok := tokenClaims.Claims.(*Claims)
+	if !ok {
+		return nil, errors.New("expected point of Claims, but not found")
+	}
+
+	adminToken := &Token{Token: token}
+	exist, err := adapter.Engine.Get(adminToken)
+	if err != nil {
+		return nil, err
+	}
+	if !exist {
+		return nil, errors.New("token not exist")
+	}
+	if adminToken.Banned {
+		return nil, errors.New("token banned")
+	}
+	if claims.ExpiresAt.Before(time.Now()) {
+		return nil, errors.New("token expired")
+	}
+	return claims, nil
 }

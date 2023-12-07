@@ -14,6 +14,7 @@ var (
 type (
 	authAction func(authForm *AuthForm) (user *object.User, err error)
 	AuthForm   struct {
+		object.PlatformConfig
 		LoginType   string `json:"loginType"`
 		Username    string `json:"username,omitempty"`
 		Password    string `json:"password,omitempty"`
@@ -27,10 +28,14 @@ type (
 		Data    *object.TokenRes `json:"data,omitempty"`
 		Code    int              `json:"code"`
 	}
+	refreshInput struct {
+		RefreshToken string `json:"refresh_token"`
+		object.PlatformConfig
+	}
 )
 
 func init() {
-	authActionMap = make(map[string]authAction, 0)
+	authActionMap = make(map[string]authAction)
 }
 
 // Login ...
@@ -69,12 +74,12 @@ func Login(c echo.Context) (err error) {
 		})
 	}
 
-	resp := handleLoggedIn(user)
+	resp := handleLoggedIn(user, authForm.PlatformConfig)
 	return c.JSON(http.StatusOK, resp)
 }
 
-func handleLoggedIn(user *object.User) (resp *UserResponse) {
-	tokenRes, err := object.GenerateToken(user)
+func handleLoggedIn(user *object.User, platform object.PlatformConfig) (resp *UserResponse) {
+	tokenRes, err := object.GenerateToken(user, platform)
 
 	if err != nil {
 		resp = &UserResponse{
@@ -102,7 +107,7 @@ func handleLoggedIn(user *object.User) (resp *UserResponse) {
 //	@Success		200				{object}	UserResponse	成功
 //	@router			/refresh-token [post]
 func RefreshToken(c echo.Context) (err error) {
-	var jsonInput map[string]string
+	var jsonInput refreshInput
 
 	if err := c.Bind(&jsonInput); err != nil {
 		return c.JSON(http.StatusBadRequest, object.Response{
@@ -110,20 +115,19 @@ func RefreshToken(c echo.Context) (err error) {
 		})
 	}
 
-	refreshToken, exist := jsonInput["refresh_token"]
-	if !exist {
+	if len(jsonInput.RefreshToken) == 0 {
 		return c.JSON(http.StatusBadRequest, object.Response{
 			Msg: "refresh-token不存在",
 		})
 	}
 
-	claims, err := object.ParseToken(refreshToken)
+	claims, err := object.ParseToken(jsonInput.RefreshToken)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, object.Response{
 			Msg: "token解析错误，请重新登录",
 		})
 	}
 
-	resp := handleLoggedIn(claims.User)
+	resp := handleLoggedIn(claims.User, jsonInput.PlatformConfig)
 	return c.JSON(http.StatusOK, resp)
 }

@@ -41,7 +41,7 @@ func UpdateProvider(provider *Provider) (rows int64, err error) {
 		return 0, fmt.Errorf("provider does not exist")
 	}
 
-	affected, err := adapter.Engine.Table("provider").Where("owner=? and name=?", provider.Owner, provider.Name).Update(provider)
+	affected, err := adapter.Engine.Where("owner=? and name=?", provider.Owner, provider.Name).Update(provider)
 	if err != nil {
 		return 0, err
 	}
