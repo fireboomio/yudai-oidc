@@ -110,7 +110,8 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 			In("user_id", userIds).
 			In("platform", []string{"", platform.Platform}).
 			NotIn("token", []string{tokenString}).
-			Update(&Token{Banned: true}); err != nil {
+			SetExpr("banned", true).
+			Update(&Token{}); err != nil {
 			return
 		}
 	}
