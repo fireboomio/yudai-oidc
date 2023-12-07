@@ -153,7 +153,7 @@ func ParseToken(token string) (*Claims, error) {
 	if adminToken.Banned {
 		return nil, errors.New("token banned")
 	}
-	if claims.ExpiresAt.Before(time.Now()) {
+	if adminToken.ExpireTime.Before(time.Now()) {
 		return nil, errors.New("token expired")
 	}
 	return claims, nil
