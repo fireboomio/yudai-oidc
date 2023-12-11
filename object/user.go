@@ -56,17 +56,19 @@ func UpdateUser(user *User) (int64, error) {
 	return affected, nil
 }
 
-func GetUserByPhone(phone string, unionIdRequired bool) (*User, bool, error) {
+func GetUserByPhone(phone string, unionidNotEmpty bool) (*User, bool, error) {
 	if phone == "" {
 		return nil, false, nil
 	}
 
 	var unionidExpr string
-	if unionIdRequired {
-		unionidExpr = "not"
+	if unionidNotEmpty {
+		unionidExpr = "<>"
+	} else {
+		unionidExpr = "="
 	}
 	user := User{Phone: phone}
-	existed, err := adapter.Engine.Where(fmt.Sprintf("wx_unionid is %s null", unionidExpr)).Get(&user)
+	existed, err := adapter.Engine.Where(fmt.Sprintf("wx_unionid %s ''", unionidExpr)).Get(&user)
 	if err != nil {
 		return nil, false, err
 	}
