@@ -29,7 +29,7 @@ func init() {
 		}()
 
 		// get login user
-		user, _, err = object.GetUserByPhone(authForm.Phone)
+		user, _, err = object.GetUserByPhone(authForm.Phone, false)
 		return
 	}
 }

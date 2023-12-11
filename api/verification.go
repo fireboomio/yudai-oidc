@@ -36,7 +36,7 @@ func SendVerificationCode(c echo.Context) (err error) {
 
 	// 通过号码获取用户
 	var user *object.User
-	if user, _, err := object.GetUserByPhone(vForm.Dest); err != nil {
+	if user, _, err := object.GetUserByPhone(vForm.Dest, false); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	} else if user == nil {
 		user := new(object.User)
