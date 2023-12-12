@@ -93,7 +93,7 @@ func UpdateUser(c echo.Context) (err error) {
 	}
 
 	if len(user.Phone) > 0 {
-		if _, existed, _ := object.GetUserByPhone(user.Phone, true); existed && len(user.WxUnionid) > 0 {
+		if _, existed, _ := object.GetUserByPhone(user.Phone, true); existed {
 			return c.JSON(http.StatusBadRequest, object.Response{
 				Msg: "手机号码已被使用，请更换手机号码！",
 			})
