@@ -12,6 +12,7 @@ type User struct {
 	CreatedAt time.Time `xorm:"varchar(100) index" json:"created_at"`
 
 	UserId       string `xorm:"varchar(255)" json:"userId"`
+	Avatar       string `xorm:"varchar(255)" json:"avatar"`
 	Password     string `xorm:"varchar(100)" json:"password"`
 	PasswordSalt string `xorm:"varchar(100)" json:"passwordSalt,omitempty"`
 	PasswordType string `xorm:"varchar(100)" json:"passwordType"`
