@@ -2,12 +2,13 @@ package api
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"regexp"
-	"simple-casdoor/object"
-	"simple-casdoor/util"
 	"time"
+	"yudai/object"
+	"yudai/util"
+
+	"github.com/labstack/echo/v4"
 )
 
 // AddUser ...

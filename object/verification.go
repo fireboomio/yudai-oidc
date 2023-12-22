@@ -3,10 +3,11 @@ package object
 import (
 	"errors"
 	"fmt"
-	"github.com/xorm-io/core"
 	"math/rand"
-	"simple-casdoor/util"
 	"time"
+	"yudai/util"
+
+	"github.com/xorm-io/core"
 )
 
 const (

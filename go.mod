@@ -1,4 +1,4 @@
-module simple-casdoor
+module yudai
 
 go 1.19
 

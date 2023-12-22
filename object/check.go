@@ -2,7 +2,7 @@ package object
 
 import (
 	"fmt"
-	"simple-casdoor/util"
+	"yudai/util"
 )
 
 func CheckUserPassword(phone string, password string) (user *User, err error) {

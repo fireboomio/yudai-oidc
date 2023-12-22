@@ -2,9 +2,10 @@ package api
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"net/http"
-	"simple-casdoor/object"
+	"yudai/object"
+
+	"github.com/labstack/echo/v4"
 )
 
 var (

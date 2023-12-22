@@ -1,7 +1,7 @@
 package api
 
 import (
-	"simple-casdoor/object"
+	"yudai/object"
 )
 
 const PWD = "password"
