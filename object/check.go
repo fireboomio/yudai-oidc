@@ -5,23 +5,23 @@ import (
 	"yudai/util"
 )
 
-func CheckUserPassword(phone string, password string) (user *User, err error) {
+func CheckUserPassword(name, password string) (user *User, err error) {
 	// 获取user的密码
 	user = &User{}
-	existed, err := adapter.Engine.Where("phone=?", phone).Get(user)
+	existed, err := adapter.Engine.Where("name=?", name).Get(user)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	if !existed {
-		return nil, fmt.Errorf("该用户不存在")
+		err = fmt.Errorf("该用户不存在")
+		return
 	}
 
-	password = util.GenMd5(user.PasswordSalt, password)
-
-	if user.Password == password {
-		return user, nil
+	if user.Password != util.GenMd5(user.PasswordSalt, password) {
+		err = fmt.Errorf("密码错误")
+		return
 	}
 
-	return nil, fmt.Errorf("密码错误")
+	return
 }
