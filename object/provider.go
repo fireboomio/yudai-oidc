@@ -2,7 +2,7 @@ package object
 
 import (
 	"fmt"
-	"simple-casdoor/util"
+	"yudai/util"
 )
 
 type Provider struct {

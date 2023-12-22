@@ -1,9 +1,10 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
-	"simple-casdoor/object"
+	"yudai/object"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Userinfo struct {

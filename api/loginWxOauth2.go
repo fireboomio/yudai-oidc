@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"simple-casdoor/object"
+	"yudai/object"
 )
 
 const (

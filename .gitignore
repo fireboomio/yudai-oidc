@@ -2,3 +2,4 @@ casdoor_service
 conf
 token_jwt_key.key
 token_jwt_key.pem
+release/

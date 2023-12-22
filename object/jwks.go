@@ -6,13 +6,14 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"github.com/labstack/gommon/log"
-	"gopkg.in/square/go-jose.v2"
 	"io"
 	"math/big"
 	"os"
-	"simple-casdoor/util"
 	"time"
+	"yudai/util"
+
+	"github.com/labstack/gommon/log"
+	"gopkg.in/square/go-jose.v2"
 )
 
 type Cert struct {

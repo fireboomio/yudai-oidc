@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
+	"yudai/api"
+	"yudai/object"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	"log"
-	"net/http"
-	"simple-casdoor/api"
-	"simple-casdoor/object"
-	"strings"
 )
 
 func main() {

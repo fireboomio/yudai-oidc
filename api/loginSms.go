@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"simple-casdoor/object"
-	"simple-casdoor/util"
+	"yudai/object"
+	"yudai/util"
 )
 
 const SMS = "sms"
