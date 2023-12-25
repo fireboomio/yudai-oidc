@@ -4,7 +4,7 @@
 
 ![鱼袋](https://static.aihanfu.net/uploadfile/2014/1128/20141128110743761.jpg)
 
-# 1.功能介绍
+# 1. 功能介绍
 
 我们的演示服务基于 Casdoor 进行了精简，自研部署了一套符合 OIDC 协议的登录认证服务，将其作为 OpenAPI数据源注册到飞步，支持手机短信登录和密码登录
 
@@ -12,126 +12,45 @@ OIDC 是一种用于身份验证和授权的开放式协议。它建立在OAuth 
 
 在分布式架构中，我们的服务可能还要接入第三方服务商，比如使用微信、QQ登录，此时token认证商是三方的服务，这个时候就有可能需要我们提供token认证的方法给三方服务。cert通常代表着公私钥对中的私钥，用于对JWT进行签名，验证Token时使用公钥进行解密和验证。那么我们是需要把公钥暴露给三方服务的。在飞布控制台我们可以去按照一定的规范添加身份验证商。
 
-# 2.如何启动
+# 2. 如何启动
 
-## 2.1 数据库初始化
+## 2.1 安装：
+curl -o /dev/null https://yudai-bin.fireboom.io/build/yudai-linux
 
-数据库脚本位于fb-oidc/sql/DDL.sql下
+## 2.2 数据库初始化
 
-## 2.2配置文件
+数据库脚本位于[oidc.sql](docs/oidc.sql)
 
-在conf/config.yaml中配置自己的数据库端口，用户名，密码等信息
+## 2.3 配置文件
 
-```Go
-mysql:
-  host: "localhost"
-  port: 3306
-  user: "root"
-  password: "123456"
-  dbname: "main"
-  max_open_conns: 200
-  max_idle_conns: 50
-```
+在conf/config.yaml中配置自己的数据库端口，用户名，密码及微信开放平台等信息[config.yaml](conf/config.yaml)
 
-## 2.3短信配置
+## 2.4 短信配置
 
 执行完sql之后，在provider表中配置短信的相关信息。
 
 在object/sms.go中会获取sms短信提供方的相关信息用于短信发送。
 
-```Go
-func getSmsClient(provider *Provider) (sender.SmsClient, error) {
-        var client sender.SmsClient
-        var err error
-
-        client, err = sender.NewSmsClient(provider.Type, provider.ClientId, provider.ClientSecret, provider.SignName, provider.TemplateCode, "")
-        if err != nil {
-                return nil, err
-        }
-
-        return client, nil
-}
-```
-
 在api/verification.go会根据获取到的sms信息进行短信的发送。
 
-```Go
-func SendVerificationCode(c echo.Context) (err error) {
-        var vForm VerificationForm
-        if err := c.Bind(&vForm); err != nil {
-                return c.JSON(http.StatusBadRequest, object.Response{
-                        Msg: err.Error(),
-                })
-        }
-        if vForm.CountryCode == "" {
-                vForm.CountryCode = "CN"
-        }
+## 2.5 架构图 https://docs.fireboom.io/v/v1.0/ji-chu-ke-shi-hua-kai-fa/shen-fen-yan-zheng/yin-shi-mo-shi#gong-zuo-yuan-li
 
-        // 通过号码获取用户
-        var user *object.User
-        if user, err := object.GetUserByPhone(vForm.Dest); err != nil {
-                return c.JSON(http.StatusInternalServerError, err.Error())
-        } else if user == nil {
-                return c.JSON(http.StatusBadRequest, object.Response{
-                        Msg: fmt.Sprintf("verification:the user does not exist, please sign up first"),
-                })
-        }
+# 3. 登录功能 调用方式参考swagger文档 [oidc.json](docs/oidc.json)
 
-        // 获取短信提供商
-        provider, err := object.GetProvider("fireboom/provider_sms")
-        if err != nil {
-                return c.JSON(http.StatusBadRequest, object.Response{
-                        Msg: fmt.Sprintf("verification:Phone number is invalid in your region %s", vForm.CountryCode),
-                })
+## 3.1 账户密码登录
+## 3.2 手机号验证码登录
+## 3.3 微信公众号h5登录
+## 3.4 微信pc扫码登录
+## 3.5 微信小程序登录
+## 3.6 微信app登录
 
-        }
+# 4. todo list
+## 4.1 cookie模式支持
+## 4.2 pgsql支持
 
-        if phone, ok := util.GetE164Number(vForm.Dest, vForm.CountryCode); !ok {
-                return c.JSON(http.StatusBadRequest, object.Response{
-                        Msg: fmt.Sprintf("verification:Phone number is invalid in your region %s", vForm.CountryCode),
-                })
-        } else {
-                remoteAddr := util.GetIPFromRequest(c.Request())
-                err := object.SendVerificationCodeToPhone(user, provider, remoteAddr, phone)
-                if err != nil {
-                        return c.JSON(http.StatusInternalServerError, object.Response{
-                                Msg: err.Error(),
-                        })
-                }
+# 5. 如何和fireboom结合 https://docs.fireboom.io/v/v1.0/ji-chu-ke-shi-hua-kai-fa/shen-fen-yan-zheng/yin-shi-mo-shi#oidc-pei-zhi
 
-                return c.JSON(http.StatusOK, object.Response{
-                        Msg: "ok",
-                })
-        }
-}
-```
-
-## 2.4 小程序登录
-
-登录凭证校验。通过 wx.login 接口获得临时登录凭证 code 后传到开发者服务器调用此接口完成登录流程。更多使用方法详见[小程序登录。](https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html)
-
-### 调用方式
-
-#### HTTPS 调用
-
-```text
-GET https://api.weixin.qq.com/sns/jscode2session 
-```
-
-#### 请求参数
-
-| 属性       | 类型   | 必填 | 说明                                                         |
-| :--------- | :----- | :--- | :----------------------------------------------------------- |
-| appid      | string | 是   | 小程序 appId                                                 |
-| secret     | string | 是   | 小程序 appSecret                                             |
-| js_code    | string | 是   | 登录时获取的 code，可通过[wx.login](https://developers.weixin.qq.com/miniprogram/dev/api/open-api/login/wx.login.html)获取 |
-| grant_type | string | 是   | 授权类型，此处只需填写 authorization_code                    |
-
-在登录时，如果需要选择小程序登录，需要传入loginType，appid，secret，js_code。其中appid，secret需要去微信开发者平台获取，js_code需要前端请求微信小程序的登录接口获取后再传入。
-
-# 3.如何使用
-
-## 3.1 Fireboom如何配置（跟钩子、RBAC没关系）
+## 5.1 Fireboom如何配置（跟钩子、RBAC没关系）
 
 将fb-oidc启动之后，启动飞布控制台，在身份验证新建身份验证器。
 
@@ -158,13 +77,13 @@ GET https://api.weixin.qq.com/sns/jscode2session
 >
 > 总结来说，JWKS是一个存储公钥和其他安全参数的JSON对象，用于身份验证和授权协议中的安全验证和签名操作。
 
-## 3.2 前端如何使用
+## 5.2 前端如何使用
 
 前端请求登录接口，验证成功后会返回token、refreshtoken和对应的过期时间。前端将token值与token过期时间存储在cookie里，refreshToken与refreshToken的过期时间存储到session里，当请求非白名单的接口时，从cookie中取出token值与其过期时间，首先检验是否过期，若过期，则读取refreshToken与其对应的过期时间，若refreshToken没有过期，则携带refreshToken去请求响应的接口，获取新的Token和refreshToken，并携带新的Token去请求接口，若refreshToken也过期，则跳转到默认页面。
 
-# 4.原理介绍
+# 6 原理介绍
 
-## 4.1 秘钥生成
+## 6.1 秘钥生成
 
 注意在 `object.jwks.go` 中需要初始化 cert, 启动项目后在 `object.jwks.go` 程序初始化时会查找项目根目录下的两个文件（用于OIDC服务发现的private key 和 certificate），如果没有会在初始化时生成这两个文件。
 
@@ -195,7 +114,7 @@ func init() {
 }
 ```
 
-## 4.2 接口介绍
+## 6.2 其他接口
 
 | **API**                 | **说明**       | **参数**                                                     |
 | ----------------------- | -------------- | ------------------------------------------------------------ |
@@ -206,4 +125,3 @@ func init() {
 | /add-user               | 添加用户       | {  "countryCode": "string",  "name": "string",  "password": "string",  "passwordType": "string",  "phone": "string"} |
 | /update-user            | 更新用户       | {  "countryCode": "string",  "name": "string",  "password": "string",  "passwordType": "string",  "phone": "string"} |
 | /send-verification-code | 发送验证码     | {  "countryCode": "string",  "dest": "string"}               |
-
