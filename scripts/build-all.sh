@@ -6,5 +6,5 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o release/yudai
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o release/yudai-windows.exe main.go
 CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -o release/yudai-windows-arm64.exe main.go
 
-datetime=$(date +"%Y-%m-%d %H:%M:%S")
+datetime=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 echo "$datetime" > release/build_time
