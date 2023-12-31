@@ -3,8 +3,8 @@ package api
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/exp/slices"
 	"net/http"
-	"slices"
 	"yudai/object"
 )
 
@@ -57,6 +57,7 @@ func AddUser(c echo.Context) (err error) {
 
 type updateUserInput struct {
 	object.User
+	object.PlatformConfig
 	Code string `json:"code"`
 }
 
@@ -82,6 +83,7 @@ func UpdateUser(c echo.Context) (err error) {
 		}
 	}
 
+	var changeUserToken *object.TokenRes
 	var existed bool
 	if len(updatedUser.Phone) > 0 {
 		if updatedUser.Phone == loginUser.Phone {
@@ -113,6 +115,7 @@ func UpdateUser(c echo.Context) (err error) {
 				if _, err = object.UpdateUserSocial(existedUser.UserId, socialUser.ProviderUserId); err != nil {
 					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 				}
+				changeUserToken, _ = object.GenerateToken(existedUser, updatedUser.PlatformConfig)
 			}
 			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
 				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
@@ -130,9 +133,10 @@ func UpdateUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, Response{
+	return c.JSON(http.StatusOK, UserResponse{
 		Code: http.StatusOK,
 		Msg:  fmt.Sprintf("affected:%d ", affected),
+		Data: changeUserToken,
 	})
 
 }

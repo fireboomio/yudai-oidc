@@ -138,7 +138,7 @@ create table oidc.sms_provider
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.user_token
+create table oidc.token
 (
     id                  int auto_increment
         primary key,
