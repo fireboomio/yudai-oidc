@@ -29,10 +29,6 @@
                     "type": "string",
                     "description": "Password"
                   },
-                  "passwordType": {
-                    "type": "string",
-                    "description": "Password type"
-                  },
                   "phone": {
                     "type": "string",
                     "description": "Phone number"
@@ -42,7 +38,7 @@
                     "description": "Country code, default CN"
                   }
                 },
-                "required": ["phone"]
+                "required": ["name", "password"]
               }
             }
           }
@@ -73,24 +69,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  },
-                  "passwordType": {
-                    "type": "string"
-                  },
                   "phone": {
                     "type": "string"
-                  },
-                  "countryCode": {
-                    "type": "string"
-                  },
-                  "userId": {
-                    "type": "string",
-                    "description": "User ID"
                   }
                 },
                 "required": ["phone"]
@@ -119,17 +99,9 @@
         "summary": "Update an existing user",
         "parameters": [
           {
-            "name": "smsCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "Authorization",
             "in": "header",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -147,7 +119,7 @@
                   "password": {
                     "type": "string"
                   },
-                  "passwordType": {
+                  "avatar": {
                     "type": "string"
                   },
                   "phone": {
@@ -156,12 +128,16 @@
                   "countryCode": {
                     "type": "string"
                   },
-                  "userId": {
-                    "type": "string",
-                    "description": "User ID"
+                  "code": {
+                    "type": "string"
+                  },
+                  "platform": {
+                    "type": "string"
+                  },
+                  "exclusive": {
+                    "type": "boolean"
                   }
-                },
-                "required": ["name", "phone", "userId"]
+                }
               }
             }
           }
@@ -192,22 +168,19 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "loginType": {
+                    "type": "string"
+                  },
                   "username": {
-                    "type": "string"
-                  },
-                  "phone": {
-                    "type": "string"
-                  },
-                  "countryCode": {
-                    "type": "string"
-                  },
-                  "code": {
                     "type": "string"
                   },
                   "password": {
                     "type": "string"
                   },
-                  "loginType": {
+                  "phone": {
+                    "type": "string"
+                  },
+                  "code": {
                     "type": "string"
                   },
                   "platform": {
@@ -217,7 +190,7 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["username", "phone", "code", "password", "loginType"]
+                "required": ["loginType"]
               }
             }
           }
