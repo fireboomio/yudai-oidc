@@ -9,9 +9,13 @@ import (
 type multipleConfig struct {
 	MySQLConfig   *MySQLConfig   `mapstructure:"mysql"`
 	WxLoginConfig *WxLoginConfig `mapstructure:"wxlogin"`
+	SystemConfig  *SystemConfig  `mapstructure:"system"`
 }
 
 type (
+	SystemConfig struct {
+		Port int `mapstructure:"port"`
+	}
 	WxLoginConfig struct {
 		H5   *WxLoginDetail `mapstructure:"h5"`
 		Pc   *WxLoginDetail `mapstructure:"pc"`

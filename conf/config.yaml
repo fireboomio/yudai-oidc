@@ -6,6 +6,8 @@ mysql:
   dbname: "oidc"
   max_open_conns: 200
   max_idle_conns: 50
+system:
+  port: 9825
 wxlogin:
   h5:
     appid: "appid"

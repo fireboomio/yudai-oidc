@@ -22,7 +22,11 @@ func main() {
 
 	object.InitAdapter()
 	r := NewRouter()
-	r.Logger.Fatal(r.Start(":9825"))
+	port := 9825
+	if object.Conf.SystemConfig != nil && object.Conf.SystemConfig.Port > 0 {
+		port = object.Conf.SystemConfig.Port
+	}
+	r.Logger.Fatal(r.Start(fmt.Sprintf(":%d", port)))
 }
 
 func NewRouter() *echo.Echo {
