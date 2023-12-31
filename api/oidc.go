@@ -8,14 +8,14 @@ import (
 )
 
 type Userinfo struct {
-	Sub string           `json:"sub"`
-	Wxs []*object.UserWx `json:"wxs"`
+	Sub     string               `json:"sub"`
+	Socials []*object.UserSocial `json:"socials"`
 }
 
 func GetJwks(c echo.Context) (err error) {
 	jwks, err := object.GetJsonWebKeySet()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, jwks)
@@ -33,11 +33,11 @@ func GetUserInfo(c echo.Context) (err error) {
 	userinfo := &Userinfo{
 		Sub: user.UserId,
 	}
-	userinfo.Wxs, _ = object.GetUserWxsByUnionid(user.WxUnionid)
-	return c.JSON(200, userinfo)
+	userinfo.Socials, _ = object.GetUserSocialsByUserId(user.UserId)
+	return c.JSON(http.StatusOK, userinfo)
 }
 
 func GetOidcDiscovery(c echo.Context) (err error) {
 	host := c.Request().Host
-	return c.JSON(200, object.GetOidcDiscovery(host))
+	return c.JSON(http.StatusOK, object.GetOidcDiscovery(host))
 }

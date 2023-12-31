@@ -3,11 +3,10 @@ package api
 import (
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"io"
 	"net/http"
 	"yudai/object"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 type (
@@ -48,31 +47,32 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
-	result, err := action.respHandle(respBody)
+	wxLoginResp, err := action.respHandle(respBody)
 	if err != nil {
 		return
 	}
 
-	if len(result.unionid) == 0 {
-		err = errors.New("请先绑定微信开放平台")
-		return
-	}
-
-	user, err = object.GetUserByWxUnionid(result.unionid)
+	userSocial, existed, err := object.GetUserSocialByProviderUserId(wxLoginResp.openid)
 	if err != nil {
 		return
 	}
 
-	if user == nil {
-		user = &object.User{
-			Name:      "WxUser",
-			WxUnionid: result.unionid,
+	if !existed {
+		userSocial = &object.UserSocial{
+			Provider:         "weixin",
+			ProviderUserId:   wxLoginResp.openid,
+			ProviderUnionid:  wxLoginResp.unionid,
+			ProviderPlatform: actionType,
 		}
-		if _, err = object.AddUser(user); err != nil {
+		_, _ = object.AddUserUserSocial(userSocial)
+	}
+	if userSocial.UserId != "" {
+		if user, _, err = object.GetUserByUserId(userSocial.UserId); err != nil {
 			return
 		}
 	}
-
-	_, _ = object.AddUserWx(&object.UserWx{Platform: actionType, Unionid: result.unionid, Openid: result.openid})
+	if user == nil {
+		user = &object.User{UserId: wxLoginResp.openid}
+	}
 	return
 }

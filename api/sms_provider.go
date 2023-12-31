@@ -8,10 +8,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// UpdateProvider
+// UpdateSmsProvider
 //
-//	@Title			UpdateProvider
-//	@Tag			Provider API
+//	@Title			UpdateSmsProvider
+//	@Tag			SmsProvider API
 //	@Description	update provider
 //	@Param			clientId		body		string			true	"clientId"
 //	@Param			clientSecret	body		string			true	"clientSecret"
@@ -19,22 +19,18 @@ import (
 //	@Param			templateCode	body		string			true	"模板代码"
 //	@Success		200				{object}	object.Response	成功
 //	@router			/update-provider [post]
-func UpdateProvider(c echo.Context) (err error) {
-	var provider object.Provider
-
-	if err := c.Bind(&provider); err != nil {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: err.Error(),
-		})
+func UpdateSmsProvider(c echo.Context) (err error) {
+	var provider object.SmsProvider
+	if err = c.Bind(&provider); err != nil {
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	affected, err := object.UpdateProvider(&provider)
+	affected, err := object.UpdateSmsProvider(&provider)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, object.Response{
-			Msg: err.Error(),
-		})
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
-	return c.JSON(http.StatusOK, object.Response{
+
+	return c.JSON(http.StatusOK, Response{
 		Code: http.StatusOK,
 		Msg:  fmt.Sprintf("affected:%d ", affected),
 	})

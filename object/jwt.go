@@ -99,15 +99,9 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	}
 
 	if platform.Exclusive {
-		var samePhoneUsers []*User
-		_ = adapter.Engine.Where("phone=?", user.Phone).Find(&samePhoneUsers)
-		var userIds []string
-		for _, v := range samePhoneUsers {
-			userIds = append(userIds, v.UserId)
-		}
 		if _, err = adapter.Engine.
 			Where("banned=0 and expire_time>?", nowTime.Format(time.DateTime)).
-			In("user_id", userIds).
+			In("user_id", []string{user.UserId}).
 			In("platform", []string{"", platform.Platform}).
 			NotIn("token", []string{tokenString}).
 			SetExpr("banned", true).
@@ -129,13 +123,7 @@ func ParseToken(token string, beanFetch func() *Token) (*Claims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		certificate, err := jwt.ParseRSAPublicKeyFromPEM(cert.Certificate)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return certificate, nil
+		return jwt.ParseRSAPublicKeyFromPEM(cert.Certificate)
 	})
 	if err != nil {
 		return nil, err

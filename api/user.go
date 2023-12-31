@@ -2,13 +2,10 @@ package api
 
 import (
 	"fmt"
-	"net/http"
-	"regexp"
-	"time"
-	"yudai/object"
-	"yudai/util"
-
 	"github.com/labstack/echo/v4"
+	"net/http"
+	"slices"
+	"yudai/object"
 )
 
 // AddUser ...
@@ -25,149 +22,138 @@ import (
 //	@router			/add-user [post]
 func AddUser(c echo.Context) (err error) {
 	var user object.User
-
-	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: err.Error(),
-		})
+	if err = c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	if user.Phone == "" {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: "手机号不能为空!",
-		})
-	}
-	if user.CountryCode == "" {
-		user.CountryCode = "CN"
-	}
-
-	if user.PasswordType == "" {
-		user.PasswordType = "md5"
-	}
-	user.PasswordSalt = util.RandomString(12)
-
-	user.Password = util.GenMd5(user.PasswordSalt, user.Password)
-	msg := checkUsername(user.Name)
-	if msg != "" {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: msg,
-		})
-	}
-
-	user.CreatedAt = time.Now()
-	affected, err := object.AddUser(&user)
+	_, existed, err := object.GetUserByName(user.Name)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, object.Response{
-			Msg: err.Error(),
-		})
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
-
-	return c.JSON(http.StatusOK, object.Response{
-		Code: http.StatusOK,
-		Msg:  fmt.Sprintf("affected:%d ", affected),
-	})
-}
-
-func UpdateUser(c echo.Context) (err error) {
-	var user object.User
-	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, object.Response{
-			Msg: err.Error(),
-		})
-	}
-	if user.CountryCode == "" {
-		user.CountryCode = "CN"
-	}
-
-	if len(user.Password) > 0 {
-		user.PasswordType = "md5"
-		user.PasswordSalt = util.RandomString(12)
-		user.Password = util.GenMd5(user.PasswordSalt, user.Password)
-	}
-
-	if user.Name != "" {
-		if msg := checkUsername(user.Name); len(msg) > 0 {
-			return c.JSON(http.StatusBadRequest, object.Response{
-				Msg: msg,
-			})
-		}
+	if existed {
+		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("用户名已存在: %s", user.Name)})
 	}
 
 	if len(user.Phone) > 0 {
-		if _, existed, _ := object.GetUserByPhone(user.Phone, true); existed {
-			return c.JSON(http.StatusBadRequest, object.Response{
-				Msg: "手机号码已被使用，请更换手机号码！",
-			})
+		_, existed, err = object.GetUserByPhone(user.Phone)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+		}
+		if existed {
+			return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("手机号已存在: %s", user.Phone)})
 		}
 	}
 
-	if smsCode := c.QueryParam("smsCode"); len(smsCode) > 0 {
-		checkPhone, ok := util.GetE164Number(user.Phone, user.CountryCode)
-		if !ok {
-			return c.JSON(http.StatusBadRequest, object.Response{
-				Msg: fmt.Sprintf("verification:Phone %s is invalid in your region %s", user.Phone, user.CountryCode),
-			})
-		}
-
-		checkResult := object.CheckSignInCode(checkPhone, smsCode)
-		if len(checkResult) > 0 {
-			return c.JSON(http.StatusBadRequest, object.Response{Msg: checkResult})
-		}
-
-		_ = object.DisableVerificationCode(checkPhone)
-	}
-
-	affected, err := object.UpdateUser(&user)
+	affected, err := object.AddUser(&user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, object.Response{
-			Msg: err.Error(),
-		})
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, object.Response{
+	return c.JSON(http.StatusOK, Response{
+		Code: http.StatusOK,
+		Msg:  fmt.Sprintf("affected:%d ", affected),
+	})
+}
+
+type updateUserInput struct {
+	object.User
+	Code string `json:"code"`
+}
+
+func UpdateUser(c echo.Context) (err error) {
+	var updatedUser updateUserInput
+	if err = c.Bind(&updatedUser); err != nil {
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+	}
+
+	loginUser := c.Get("user").(*object.User)
+	if len(updatedUser.Name) > 0 {
+		if updatedUser.Name == loginUser.Name {
+			updatedUser.Name = ""
+		} else {
+			var repeated bool
+			_, repeated, err = object.GetUserByName(updatedUser.Name)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+			}
+			if repeated {
+				return c.JSON(http.StatusBadRequest, Response{Msg: "用户名已存在，请更换用户名！"})
+			}
+		}
+	}
+
+	var existed bool
+	if len(updatedUser.Phone) > 0 {
+		if updatedUser.Phone == loginUser.Phone {
+			updatedUser.Phone = ""
+		} else {
+			var existedUser *object.User
+			existedUser, existed, err = object.GetUserByPhone(updatedUser.Phone)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+			}
+
+			if existed {
+				socialUser, socialExisted, _ := object.GetUserSocialByProviderUserId(loginUser.UserId)
+				// 不是社交账号则返回手机号被使用
+				if !socialExisted {
+					return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
+				}
+
+				// 如果手机号用户存在，则检查对应的social用户是否存在（providerUserId不同但provider和platform相同）
+				var socials []*object.UserSocial
+				if socials, err = object.GetUserSocialsByUserId(existedUser.UserId); err != nil {
+					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+				}
+				if len(socials) > 0 && slices.ContainsFunc(socials, func(social *object.UserSocial) bool {
+					return social.ProviderUserId != socialUser.ProviderUserId && social.Provider+social.ProviderPlatform == socialUser.Provider+social.ProviderPlatform
+				}) {
+					return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
+				}
+				if _, err = object.UpdateUserSocial(existedUser.UserId, socialUser.ProviderUserId); err != nil {
+					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+				}
+			}
+			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
+				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+			}
+		}
+	}
+
+	var affected int64
+	if existed {
+		affected, err = object.UpdateUser(&updatedUser.User)
+	} else {
+		affected, err = object.AddUser(&updatedUser.User)
+	}
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, Response{
 		Code: http.StatusOK,
 		Msg:  fmt.Sprintf("affected:%d ", affected),
 	})
 
 }
 
-func checkUsername(username string) string {
-	if username == "" {
-		return "检查:空用户名."
-	} else if len(username) > 39 {
-		return "检查:用户名太长（最多39个字符）."
-	}
-
-	exclude, _ := regexp.Compile("^[\u0021-\u007E]+$")
-	if !exclude.MatchString(username) {
-		return ""
-	}
-	return ""
-}
-
-func IsUserExists(c echo.Context) (err error) {
+func IsUserExistsByPhone(c echo.Context) (err error) {
 	var user object.User
-	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, UserResponse{
-			Msg:     "",
-			Success: false,
-		})
+	if err = c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, UserResponse{Msg: err.Error()})
 	}
-	_, exist, err := object.GetUserByPhone(user.Phone, false)
 
+	_, exist, err := object.GetUserByPhone(user.Phone)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, UserResponse{Msg: err.Error()})
 	}
 
 	if !exist {
-		return c.JSON(http.StatusBadRequest, UserResponse{
-			Msg:     "用户不存在",
-			Success: exist,
-		})
+		return c.JSON(http.StatusBadRequest, UserResponse{Msg: "用户不存在"})
 	}
+
 	return c.JSON(http.StatusOK, UserResponse{
-		Msg:     "success",
-		Success: exist,
+		Success: true,
 		Code:    http.StatusOK,
 	})
 }

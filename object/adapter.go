@@ -7,6 +7,7 @@ import (
 	"github.com/xorm-io/xorm"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 // Adapter represents the MySQL adapter for policy storage.
@@ -20,7 +21,6 @@ type Adapter struct {
 var adapter *Adapter
 
 func InitAdapter() {
-
 	host := Conf.MySQLConfig.Host
 	port := strconv.Itoa(Conf.MySQLConfig.Port)
 	user := Conf.MySQLConfig.User
@@ -31,6 +31,7 @@ func InitAdapter() {
 
 	tbMapper := core.NewPrefixMapper(core.SameMapper{}, "")
 	adapter.Engine.SetTableMapper(tbMapper)
+	adapter.Engine.DatabaseTZ = time.UTC
 }
 
 // NewAdapter is the constructor for Adapter.

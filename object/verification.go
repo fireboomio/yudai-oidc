@@ -3,6 +3,7 @@ package object
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"math/rand"
 	"time"
 	"yudai/util"
@@ -93,7 +94,7 @@ func CheckSignInCode(dest, code string) string {
 	}
 }
 
-func SendVerificationCodeToPhone(user *User, provider *Provider, remoteAddr string, dest string) error {
+func SendVerificationCodeToPhone(user *User, provider *SmsProvider, remoteAddr string, dest string) error {
 	if provider == nil {
 		return errors.New("please set a SMS provider first")
 	}
@@ -114,7 +115,7 @@ func SendVerificationCodeToPhone(user *User, provider *Provider, remoteAddr stri
 	return nil
 }
 
-func AddToVerificationRecord(user *User, provider *Provider, dest, code string) error {
+func AddToVerificationRecord(user *User, provider *SmsProvider, dest, code string) error {
 	var record VerificationRecord
 	if user != nil {
 		record.User = user.Name
@@ -124,7 +125,7 @@ func AddToVerificationRecord(user *User, provider *Provider, dest, code string) 
 	record.Provider = provider.Name
 	record.Receiver = dest
 	record.Code = code
-	record.Name = util.GenerateId()
+	record.Name = uuid.NewString()
 	record.Time = time.Now().Unix()
 	record.IsUsed = false
 

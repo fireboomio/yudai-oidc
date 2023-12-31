@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func getSmsClient(provider *Provider) (sender.SmsClient, error) {
+func getSmsClient(provider *SmsProvider) (sender.SmsClient, error) {
 	var client sender.SmsClient
 	var err error
 
@@ -17,7 +17,7 @@ func getSmsClient(provider *Provider) (sender.SmsClient, error) {
 	return client, nil
 }
 
-func SendSms(provider *Provider, content string, phoneNumbers ...string) error {
+func SendSms(provider *SmsProvider, content string, phoneNumbers ...string) error {
 	client, err := getSmsClient(provider)
 	if err != nil {
 		return err
