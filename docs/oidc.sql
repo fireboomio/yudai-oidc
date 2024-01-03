@@ -122,7 +122,7 @@ create table oidc.demo_post
 )
     collate = utf8mb4_unicode_ci;
 
-create table oidc.sms_provider
+create table oidc.provider
 (
     owner         varchar(100)  not null,
     name          varchar(100)  not null,

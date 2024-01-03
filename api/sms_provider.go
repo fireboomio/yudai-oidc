@@ -11,7 +11,7 @@ import (
 // UpdateSmsProvider
 //
 //	@Title			UpdateSmsProvider
-//	@Tag			SmsProvider API
+//	@Tag			Provider API
 //	@Description	update provider
 //	@Param			clientId		body		string			true	"clientId"
 //	@Param			clientSecret	body		string			true	"clientSecret"
@@ -20,7 +20,7 @@ import (
 //	@Success		200				{object}	object.Response	成功
 //	@router			/update-provider [post]
 func UpdateSmsProvider(c echo.Context) (err error) {
-	var provider object.SmsProvider
+	var provider object.Provider
 	if err = c.Bind(&provider); err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}

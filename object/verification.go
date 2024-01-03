@@ -94,7 +94,7 @@ func CheckSignInCode(dest, code string) string {
 	}
 }
 
-func SendVerificationCodeToPhone(user *User, provider *SmsProvider, remoteAddr string, dest string) error {
+func SendVerificationCodeToPhone(user *User, provider *Provider, remoteAddr string, dest string) error {
 	if provider == nil {
 		return errors.New("please set a SMS provider first")
 	}
@@ -115,7 +115,7 @@ func SendVerificationCodeToPhone(user *User, provider *SmsProvider, remoteAddr s
 	return nil
 }
 
-func AddToVerificationRecord(user *User, provider *SmsProvider, dest, code string) error {
+func AddToVerificationRecord(user *User, provider *Provider, dest, code string) error {
 	var record VerificationRecord
 	if user != nil {
 		record.User = user.Name

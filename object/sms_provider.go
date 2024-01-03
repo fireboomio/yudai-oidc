@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-type SmsProvider struct {
+type Provider struct {
 	Owner       string `xorm:"varchar(100) notnull pk" json:"owner"`
 	Name        string `xorm:"varchar(100) notnull pk unique" json:"name"`
 	CreatedTime string `xorm:"varchar(100)" json:"createdTime"`
@@ -16,14 +16,14 @@ type SmsProvider struct {
 	TemplateCode string `xorm:"varchar(100)" json:"templateCode"`
 }
 
-func GetSmsProvider(id string) (*SmsProvider, bool, error) {
+func GetSmsProvider(id string) (*Provider, bool, error) {
 	owner, name, _ := strings.Cut(id, "/")
-	provider := SmsProvider{Owner: owner, Name: name}
+	provider := Provider{Owner: owner, Name: name}
 	existed, err := adapter.Engine.Get(&provider)
 	return &provider, existed, err
 }
 
-func UpdateSmsProvider(provider *SmsProvider) (rows int64, err error) {
+func UpdateSmsProvider(provider *Provider) (rows int64, err error) {
 	if provider.Owner == "" {
 		provider.Owner = "fireboom"
 	}

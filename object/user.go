@@ -68,26 +68,24 @@ func fillUserInfo(user *User) {
 	}
 }
 
-func GetUserByPhone(phone string) (user *User, existed bool, err error) {
+func GetUserByPhone(phone string) (*User, bool, error) {
 	if phone == "" {
-		err = errors.New("手机号码为空")
-		return
+		return nil, false, errors.New("手机号码为空")
 	}
 
-	user = &User{Phone: phone}
-	existed, err = adapter.Engine.Get(&user)
-	return
+	user := User{Phone: phone}
+	existed, err := adapter.Engine.Get(&user)
+	return &user, existed, err
 }
 
-func GetUserByUserId(userId string) (user *User, existed bool, err error) {
+func GetUserByUserId(userId string) (*User, bool, error) {
 	if userId == "" {
-		err = errors.New("用户ID为空")
-		return
+		return nil, false, errors.New("用户ID为空")
 	}
 
-	user = &User{}
-	existed, err = adapter.Engine.Where("user_id=?", user).Get(user)
-	return
+	user := User{UserId: userId}
+	existed, err := adapter.Engine.Get(user)
+	return &user, existed, err
 }
 
 func GetUserByName(name string) (user *User, existed bool, err error) {
@@ -107,8 +105,9 @@ func GetUserByName(name string) (user *User, existed bool, err error) {
 		return
 	}
 
-	user = &User{}
-	existed, err = adapter.Engine.Where("name=?", name).Get(user)
+	queryUser := User{Name: name}
+	existed, err = adapter.Engine.Get(&queryUser)
+	user = &queryUser
 	return
 }
 
