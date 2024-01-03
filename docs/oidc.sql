@@ -169,7 +169,7 @@ create table oidc.user
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.user_social
+create table oidc.usersocial
 (
     id                int auto_increment
         primary key,
@@ -183,7 +183,7 @@ create table oidc.user_social
         unique (provider_user_id)
 );
 
-create table oidc.verification_record
+create table oidc.verificationrecord
 (
     name         varchar(100) not null
         primary key,
