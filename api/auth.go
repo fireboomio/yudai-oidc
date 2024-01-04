@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"yudai/object"
 
@@ -93,19 +94,19 @@ func RefreshToken(c echo.Context) (err error) {
 	}
 
 	if len(jsonInput.RefreshToken) == 0 {
-		return c.JSON(http.StatusBadRequest, Response{Msg: "refresh-token为空"})
+		return c.JSON(http.StatusBadRequest, Response{Msg: "refresh_token为空"})
 	}
 
 	claims, err := object.ParseToken(jsonInput.RefreshToken, func() *object.Token {
 		return &object.Token{RefreshToken: jsonInput.RefreshToken}
 	})
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, Response{Msg: "token解析错误"})
+		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("token解析错误(%s)", err.Error())})
 	}
 
 	tokenRes, err := object.GenerateToken(claims.User, jsonInput.PlatformConfig)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("token生成错误(%s)", err.Error())})
 	}
 
 	return c.JSON(http.StatusOK, &UserResponse{
