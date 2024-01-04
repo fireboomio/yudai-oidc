@@ -36,9 +36,11 @@
                   "countryCode": {
                     "type": "string",
                     "description": "Country code, default CN"
+                  },
+                  "avatar": {
+                    "type": "string"
                   }
-                },
-                "required": ["name", "password"]
+                }
               }
             }
           }
