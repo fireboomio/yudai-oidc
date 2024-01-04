@@ -171,7 +171,8 @@
                 "type": "object",
                 "properties": {
                   "loginType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": ["password", "sms", "mini", "app", "h5", "web"]
                   },
                   "username": {
                     "type": "string"
