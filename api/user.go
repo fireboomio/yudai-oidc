@@ -84,12 +84,15 @@ func UpdateUser(c echo.Context) (err error) {
 	}
 
 	var changeUserToken *object.TokenRes
-	var existed bool
+	var createRequired bool
 	if len(updatedUser.Phone) > 0 {
 		if updatedUser.Phone == loginUser.Phone {
 			updatedUser.Phone = ""
 		} else {
-			var existedUser *object.User
+			var (
+				existedUser *object.User
+				existed     bool
+			)
 			existedUser, existed, err = object.GetUserByPhone(updatedUser.Phone)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
@@ -116,6 +119,7 @@ func UpdateUser(c echo.Context) (err error) {
 					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 				}
 				changeUserToken, _ = object.GenerateToken(existedUser, updatedUser.PlatformConfig)
+				createRequired = true
 			}
 			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
 				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
@@ -123,11 +127,12 @@ func UpdateUser(c echo.Context) (err error) {
 		}
 	}
 
+	updatedUser.UserId = loginUser.UserId
 	var affected int64
-	if existed {
-		affected, err = object.UpdateUser(&updatedUser.User)
-	} else {
+	if createRequired {
 		affected, err = object.AddUser(&updatedUser.User)
+	} else {
+		affected, err = object.UpdateUser(&updatedUser.User)
 	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
