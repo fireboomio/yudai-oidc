@@ -69,7 +69,8 @@ func UpdateUser(c echo.Context) (err error) {
 
 	var prepareUpdateUser *object.User
 	if len(updatedUser.UserId) > 0 {
-		if prepareUpdateUser, _, _ = object.GetUserByUserId(updatedUser.UserId); prepareUpdateUser == nil {
+		var exited bool
+		if prepareUpdateUser, exited, _ = object.GetUserByUserId(updatedUser.UserId); !exited {
 			return c.JSON(http.StatusBadRequest, Response{Msg: "用户不存在"})
 		}
 	} else {
