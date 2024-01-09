@@ -67,9 +67,16 @@ func UpdateUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	loginUser := c.Get("user").(*object.User)
+	var prepareUpdateUser *object.User
+	if len(updatedUser.UserId) > 0 {
+		if prepareUpdateUser, _, _ = object.GetUserByUserId(updatedUser.UserId); prepareUpdateUser == nil {
+			return c.JSON(http.StatusBadRequest, Response{Msg: "用户不存在"})
+		}
+	} else {
+		prepareUpdateUser = c.Get("user").(*object.User)
+	}
 	if len(updatedUser.Name) > 0 {
-		if updatedUser.Name == loginUser.Name {
+		if updatedUser.Name == prepareUpdateUser.Name {
 			updatedUser.Name = ""
 		} else {
 			var repeated bool
@@ -86,7 +93,7 @@ func UpdateUser(c echo.Context) (err error) {
 	var changeUserToken *object.TokenRes
 	var createRequired bool
 	if len(updatedUser.Phone) > 0 {
-		if updatedUser.Phone == loginUser.Phone {
+		if updatedUser.Phone == prepareUpdateUser.Phone {
 			updatedUser.Phone = ""
 		} else {
 			var (
@@ -99,7 +106,7 @@ func UpdateUser(c echo.Context) (err error) {
 			}
 
 			if existed {
-				socialUser, socialExisted, _ := object.GetUserSocialByProviderUserId(loginUser.UserId)
+				socialUser, socialExisted, _ := object.GetUserSocialByProviderUserId(prepareUpdateUser.UserId)
 				// 不是社交账号则返回手机号被使用
 				if !socialExisted {
 					return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
@@ -119,6 +126,7 @@ func UpdateUser(c echo.Context) (err error) {
 					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 				}
 				changeUserToken, _ = object.GenerateToken(existedUser, updatedUser.PlatformConfig)
+			} else {
 				createRequired = true
 			}
 			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
@@ -127,7 +135,7 @@ func UpdateUser(c echo.Context) (err error) {
 		}
 	}
 
-	updatedUser.UserId = loginUser.UserId
+	updatedUser.UserId = prepareUpdateUser.UserId
 	var affected int64
 	if createRequired {
 		affected, err = object.AddUser(&updatedUser.User)
