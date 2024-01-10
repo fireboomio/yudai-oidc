@@ -1,20 +1,3 @@
-create table oidc.admin_log
-(
-    id        int auto_increment
-        primary key,
-    createdAt datetime default CURRENT_TIMESTAMP not null,
-    ip        varchar(36)                        not null,
-    ua        varchar(256)                       not null,
-    method    varchar(16)                        not null,
-    path      varchar(512)                       not null,
-    status    varchar(36)                        null,
-    error     text                               null,
-    userId    varchar(36)                        null,
-    cost      double                             null,
-    requestId varchar(64)                        not null
-)
-    collate = utf8mb4_unicode_ci;
-
 create table oidc.admin_menu
 (
     id            int auto_increment
@@ -33,7 +16,7 @@ create table oidc.admin_menu
     `schema`      text                                 null,
     visibleInMenu tinyint(1) default 1                 not null
 )
-    collate = utf8mb4_unicode_ci;
+    collate = utf8mb4_general_ci;
 
 create table oidc.admin_role
 (
@@ -103,7 +86,7 @@ create table oidc.demo_post_category
     name        varchar(64)                        not null,
     description varchar(255)                       null
 )
-    collate = utf8mb4_unicode_ci;
+    collate = utf8mb4_general_ci;
 
 create table oidc.demo_post
 (
@@ -120,7 +103,7 @@ create table oidc.demo_post
         foreign key (categoryId) references oidc.demo_post_category (id)
             on update cascade on delete cascade
 )
-    collate = utf8mb4_unicode_ci;
+    collate = utf8mb4_general_ci;
 
 create table oidc.provider
 (
@@ -142,9 +125,10 @@ create table oidc.token
 (
     id                  int auto_increment
         primary key,
-    user_id             varchar(255)           null,
+    user_id             varchar(36)            null,
     token               longtext               null,
     expire_time         datetime               null,
+    flush_time          datetime               null,
     refresh_token       longtext               null,
     refresh_expire_time datetime               null,
     banned              tinyint(1)             null,
@@ -156,16 +140,39 @@ create table oidc.user
 (
     id            int auto_increment
         primary key,
-    user_id       varchar(255) null,
+    user_id       varchar(36)  null,
     created_at    datetime     null,
     updated_at    datetime     null,
-    name          varchar(32)  not null,
-    avatar        varchar(255) null,
+    name          varchar(64)  not null,
+    avatar        varchar(255) null comment '头像',
     password_type varchar(100) null,
     password_salt varchar(100) null,
     password      varchar(100) null,
     phone         char(13)     null,
-    country_code  varchar(6)   null
+    country_code  varchar(6)   null,
+    constraint user_user_id_key
+        unique (user_id)
+)
+    comment '用户表' collate = utf8mb4_general_ci;
+
+create table oidc.admin_log
+(
+    id        int auto_increment
+        primary key,
+    createdAt datetime default CURRENT_TIMESTAMP not null,
+    ip        varchar(36)                        not null,
+    ua        varchar(256)                       not null,
+    method    varchar(16)                        not null,
+    path      varchar(512)                       not null,
+    status    varchar(36)                        null,
+    error     text                               null,
+    userId    varchar(36)                        null,
+    cost      double                             null,
+    requestId varchar(64)                        not null,
+    body      text                               null,
+    constraint admin_log_userId_fkey
+        foreign key (userId) references oidc.user (user_id)
+            on update cascade on delete cascade
 )
     collate = utf8mb4_general_ci;
 
@@ -179,7 +186,7 @@ create table oidc.usersocial
     provider_platform varchar(64) null,
     provider_unionid  varchar(64) null,
     created_at        datetime    not null,
-    constraint user_social_pk
+    constraint usersocial_pk
         unique (provider_user_id)
 );
 
