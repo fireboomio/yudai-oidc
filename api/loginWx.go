@@ -74,5 +74,6 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 	if user == nil {
 		user = &object.User{UserId: wxLoginResp.openid}
 	}
+	user.SocialUserId = wxLoginResp.openid
 	return
 }

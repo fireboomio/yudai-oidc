@@ -22,6 +22,8 @@ type User struct {
 
 	Phone       string `xorm:"varchar(20) index" json:"phone,omitempty"`
 	CountryCode string `xorm:"varchar(6)" json:"countryCode,omitempty"`
+
+	SocialUserId string `xorm:"-" json:"socialUserId,omitempty"`
 }
 
 func AddUser(user *User) (int64, error) {

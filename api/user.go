@@ -75,6 +75,7 @@ func UpdateUser(c echo.Context) (err error) {
 		}
 	} else {
 		prepareUpdateUser = c.Get("user").(*object.User)
+		updatedUser.UserId = prepareUpdateUser.UserId
 	}
 	if len(updatedUser.Name) > 0 {
 		if updatedUser.Name == prepareUpdateUser.Name {
@@ -106,29 +107,34 @@ func UpdateUser(c echo.Context) (err error) {
 				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 			}
 
-			if existed {
-				socialUser, socialExisted, _ := object.GetUserSocialByProviderUserId(prepareUpdateUser.UserId)
-				// 不是社交账号则返回手机号被使用
-				if !socialExisted {
-					return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
-				}
+			isSocialUser := len(prepareUpdateUser.SocialUserId) > 0
+			if existed && !isSocialUser {
+				return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
+			}
 
-				// 如果手机号用户存在，则检查对应的social用户是否存在（providerUserId不同但provider和platform相同）
-				var socials []*object.UserSocial
-				if socials, err = object.GetUserSocialsByUserId(existedUser.UserId); err != nil {
-					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+			if isSocialUser {
+				if !existed {
+					createRequired = true
+				} else {
+					socialUser, socialExisted, _ := object.GetUserSocialByProviderUserId(prepareUpdateUser.SocialUserId)
+					if !socialExisted {
+						return c.JSON(http.StatusBadRequest, Response{Msg: "社交用户未找到"})
+					}
+					// 如果手机号用户存在，则检查对应的social用户是否存在（providerUserId不同但provider和platform相同）
+					var socials []*object.UserSocial
+					if socials, err = object.GetUserSocialsByUserId(existedUser.UserId); err != nil {
+						return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+					}
+					if len(socials) > 0 && slices.ContainsFunc(socials, func(social *object.UserSocial) bool {
+						return social.ProviderUserId != socialUser.ProviderUserId && social.Provider+social.ProviderPlatform == socialUser.Provider+social.ProviderPlatform
+					}) {
+						return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
+					}
+					if _, err = object.UpdateUserSocial(existedUser.UserId, socialUser.ProviderUserId); err != nil {
+						return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+					}
+					changeUserToken, _ = object.GenerateToken(existedUser, updatedUser.PlatformConfig)
 				}
-				if len(socials) > 0 && slices.ContainsFunc(socials, func(social *object.UserSocial) bool {
-					return social.ProviderUserId != socialUser.ProviderUserId && social.Provider+social.ProviderPlatform == socialUser.Provider+social.ProviderPlatform
-				}) {
-					return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
-				}
-				if _, err = object.UpdateUserSocial(existedUser.UserId, socialUser.ProviderUserId); err != nil {
-					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
-				}
-				changeUserToken, _ = object.GenerateToken(existedUser, updatedUser.PlatformConfig)
-			} else {
-				createRequired = true
 			}
 			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
 				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
@@ -136,7 +142,6 @@ func UpdateUser(c echo.Context) (err error) {
 		}
 	}
 
-	updatedUser.UserId = prepareUpdateUser.UserId
 	var affected int64
 	if createRequired {
 		affected, err = object.AddUser(&updatedUser.User)
