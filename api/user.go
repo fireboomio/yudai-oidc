@@ -99,10 +99,10 @@ func UpdateUser(c echo.Context) (err error) {
 			updatedUser.Phone = ""
 		} else {
 			var (
-				existedUser *object.User
-				existed     bool
+				existedPhoneUser *object.User
+				existed          bool
 			)
-			existedUser, existed, err = object.GetUserByPhone(updatedUser.Phone)
+			existedPhoneUser, existed, err = object.GetUserByPhone(updatedUser.Phone)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 			}
@@ -113,16 +113,14 @@ func UpdateUser(c echo.Context) (err error) {
 			}
 
 			if isSocialUser {
-				if !existed {
-					createRequired = true
-				} else {
+				if createRequired = !existed; existed {
 					socialUser, socialExisted, _ := object.GetUserSocialByProviderUserId(prepareUpdateUser.SocialUserId)
 					if !socialExisted {
 						return c.JSON(http.StatusBadRequest, Response{Msg: "社交用户未找到"})
 					}
 					// 如果手机号用户存在，则检查对应的social用户是否存在（providerUserId不同但provider和platform相同）
 					var socials []*object.UserSocial
-					if socials, err = object.GetUserSocialsByUserId(existedUser.UserId); err != nil {
+					if socials, err = object.GetUserSocialsByUserId(existedPhoneUser.UserId); err != nil {
 						return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 					}
 					if len(socials) > 0 && slices.ContainsFunc(socials, func(social *object.UserSocial) bool {
@@ -130,10 +128,10 @@ func UpdateUser(c echo.Context) (err error) {
 					}) {
 						return c.JSON(http.StatusBadRequest, Response{Msg: "手机号码已被使用，请更换手机号码！"})
 					}
-					if _, err = object.UpdateUserSocial(existedUser.UserId, socialUser.ProviderUserId); err != nil {
+					if _, err = object.UpdateUserSocial(existedPhoneUser.UserId, socialUser.ProviderUserId); err != nil {
 						return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 					}
-					changeUserToken, _ = object.GenerateToken(existedUser, updatedUser.PlatformConfig)
+					changeUserToken, _ = object.GenerateToken(existedPhoneUser, updatedUser.PlatformConfig)
 				}
 			}
 			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {

@@ -57,20 +57,23 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
-	if !existed {
+	if existed {
+		if userSocial.UserId != "" {
+			user, _, err = object.GetUserByUserId(userSocial.UserId)
+		}
+	} else {
 		userSocial = &object.UserSocial{
 			Provider:         "weixin",
 			ProviderUserId:   wxLoginResp.openid,
 			ProviderUnionid:  wxLoginResp.unionid,
 			ProviderPlatform: actionType,
 		}
-		_, _ = object.AddUserUserSocial(userSocial)
+		_, err = object.AddUserUserSocial(userSocial)
 	}
-	if userSocial.UserId != "" {
-		if user, _, err = object.GetUserByUserId(userSocial.UserId); err != nil {
-			return
-		}
+	if err != nil {
+		return
 	}
+
 	if user == nil {
 		user = &object.User{UserId: wxLoginResp.openid}
 	}
