@@ -9,6 +9,7 @@ import (
 	"io"
 	"math/big"
 	"os"
+	"path/filepath"
 	"time"
 	"yudai/util"
 
@@ -25,8 +26,8 @@ var cert *Cert
 
 func init() {
 	cert = new(Cert)
-	permPath, _ := util.GetAbsolutePath("token_jwt_key.pem")
-	keyPath, _ := util.GetAbsolutePath("token_jwt_key.key")
+	permPath, _ := util.GetAbsolutePath("cert/token_jwt_key.pem")
+	keyPath, _ := util.GetAbsolutePath("cert/token_jwt_key.key")
 
 	pemData, err := getFileData(permPath)
 	if err != nil {
@@ -129,6 +130,7 @@ func generateRsaKeys(bitSize int, expireInYears int, commonName string, organiza
 }
 
 func generateCertFile(filename string, content []byte) {
+	_ = os.MkdirAll(filepath.Dir(filename), os.ModePerm)
 	file, err := os.Create(filename)
 	if err != nil {
 		log.Error(err.Error())
