@@ -87,8 +87,8 @@ func Authorize(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, "token format error")
 		}
 
-		claims, err := object.ParseToken(tokenString, func() *object.Token {
-			return &object.Token{Token: tokenString}
+		claims, err := object.ParseToken(tokenString, func() object.Token {
+			return object.Token{Token: tokenString}
 		})
 		if err != nil || claims == nil {
 			// 验证不通过，不再调用后续的函数处理

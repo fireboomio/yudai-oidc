@@ -86,8 +86,8 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 		Banned:            false,
 	}
 
-	adminToken := &Token{Token: tokenString}
-	exist, err := adapter.Engine.Get(adminToken)
+	adminToken := Token{Token: tokenString}
+	exist, err := adapter.Engine.Get(&adminToken)
 	if err != nil {
 		return
 	}
@@ -117,7 +117,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	}, err
 }
 
-func ParseToken(token string, beanFetch func() *Token) (*Claims, error) {
+func ParseToken(token string, beanFetch func() Token) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -141,8 +141,8 @@ func ParseToken(token string, beanFetch func() *Token) (*Claims, error) {
 	return claims, validateToken(beanFetch())
 }
 
-func validateToken(tokenBean *Token) error {
-	exist, err := adapter.Engine.Get(tokenBean)
+func validateToken(tokenBean Token) error {
+	exist, err := adapter.Engine.Get(&tokenBean)
 	if err != nil {
 		return err
 	}

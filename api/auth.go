@@ -97,8 +97,8 @@ func RefreshToken(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: "refresh_token为空"})
 	}
 
-	claims, err := object.ParseToken(jsonInput.RefreshToken, func() *object.Token {
-		return &object.Token{RefreshToken: jsonInput.RefreshToken}
+	claims, err := object.ParseToken(jsonInput.RefreshToken, func() object.Token {
+		return object.Token{RefreshToken: jsonInput.RefreshToken}
 	})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("token解析错误(%s)", err.Error())})

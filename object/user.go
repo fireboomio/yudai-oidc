@@ -86,7 +86,7 @@ func GetUserByUserId(userId string) (*User, bool, error) {
 	}
 
 	user := User{UserId: userId}
-	existed, err := adapter.Engine.Get(user)
+	existed, err := adapter.Engine.Get(&user)
 	return &user, existed, err
 }
 
