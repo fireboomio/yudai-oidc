@@ -3,16 +3,17 @@ package api
 import (
 	"errors"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"io"
 	"net/http"
 	"yudai/object"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 type (
 	loginAction struct {
 		url          string
-		configHandle func(*object.WxLoginConfig) *object.WxLoginDetail
+		configHandle func() *object.WxLoginConfiguration
 		respHandle   func([]byte) (*loginActionResult, error)
 	}
 	loginActionResult struct {
@@ -30,8 +31,8 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
-	wxConfig := action.configHandle(object.Conf.WxLoginConfig)
-	appid, secret := wxConfig.Appid, wxConfig.Secret
+	wxConfig := action.configHandle()
+	appid, secret := wxConfig.AppID, wxConfig.AppSecret
 	resp, err := http.Get(fmt.Sprintf(action.url, appid, secret, code))
 	if err != nil {
 		return

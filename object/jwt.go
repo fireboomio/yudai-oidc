@@ -3,8 +3,9 @@ package object
 import (
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type Claims struct {
@@ -87,19 +88,19 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	}
 
 	adminToken := Token{Token: tokenString}
-	exist, err := adapter.Engine.Get(&adminToken)
+	exist, err := engine.Get(&adminToken)
 	if err != nil {
 		return
 	}
 
 	if !exist {
-		if _, err = adapter.Engine.Insert(at); err != nil {
+		if _, err = engine.Insert(at); err != nil {
 			return
 		}
 	}
 
 	if platform.Exclusive {
-		if _, err = adapter.Engine.
+		if _, err = engine.
 			Where("banned=0 and expire_time>?", nowTime.Format(time.DateTime)).
 			In("user_id", []string{user.UserId}).
 			In("platform", []string{"", platform.Platform}).
@@ -142,7 +143,7 @@ func ParseToken(token string, beanFetch func() Token) (*Claims, error) {
 }
 
 func validateToken(tokenBean Token) error {
-	exist, err := adapter.Engine.Get(&tokenBean)
+	exist, err := engine.Get(&tokenBean)
 	if err != nil {
 		return err
 	}

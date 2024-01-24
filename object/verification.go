@@ -3,12 +3,12 @@ package object
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"math/rand"
 	"time"
 	"yudai/util"
 
-	"github.com/xorm-io/core"
+	"github.com/google/uuid"
+	"xorm.io/xorm/schemas"
 )
 
 const (
@@ -42,7 +42,7 @@ func IsAllowSend(user *User, recordType string) error {
 	if user != nil {
 		record.User = user.Name
 	}
-	has, err := adapter.Engine.Desc("created_time").Get(&record)
+	has, err := engine.Desc("created_time").Get(&record)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func AddToVerificationRecord(user *User, provider *Provider, dest, code string) 
 	record.Time = time.Now().Unix()
 	record.IsUsed = false
 
-	_, err := adapter.Engine.Insert(record)
+	_, err := engine.Insert(record)
 	if err != nil {
 		return err
 	}
@@ -144,14 +144,14 @@ func DisableVerificationCode(dest string) (err error) {
 	}
 
 	record.IsUsed = true
-	_, err = adapter.Engine.ID(core.PK{record.Name}).AllCols().Update(record)
+	_, err = engine.ID(schemas.PK{record.Name}).AllCols().Update(record)
 	return
 }
 
 func getVerificationRecord(dest string) (*VerificationRecord, error) {
 	var record VerificationRecord
 	record.Receiver = dest
-	has, err := adapter.Engine.Desc("time").Where("is_used = 0").Get(&record)
+	has, err := engine.Desc("time").Where("is_used = 0").Get(&record)
 	if err != nil {
 		return nil, err
 	}
