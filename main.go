@@ -10,6 +10,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/spf13/viper"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -22,10 +23,7 @@ func main() {
 
 	object.InitAdapter()
 	r := NewRouter()
-	port := 9825
-	if object.Conf.SystemConfig != nil && object.Conf.SystemConfig.Port > 0 {
-		port = object.Conf.SystemConfig.Port
-	}
+	port := viper.GetInt("port")
 	r.Logger.Fatal(r.Start(fmt.Sprintf(":%d", port)))
 }
 

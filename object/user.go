@@ -3,10 +3,11 @@ package object
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"regexp"
 	"time"
 	"yudai/util"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
@@ -39,7 +40,7 @@ func AddUser(user *User) (int64, error) {
 	}
 
 	fillUserInfo(user)
-	affected, err := adapter.Engine.Insert(user)
+	affected, err := engine.Insert(user)
 	if err != nil {
 		return 0, err
 	}
@@ -56,7 +57,7 @@ func UpdateUser(user *User) (int64, error) {
 		user.UpdatedAt = time.Now()
 	}
 	fillUserInfo(user)
-	return adapter.Engine.Where("user_id=?", user.UserId).Update(user)
+	return engine.Where("user_id=?", user.UserId).Update(user)
 }
 
 func fillUserInfo(user *User) {
@@ -76,7 +77,7 @@ func GetUserByPhone(phone string) (*User, bool, error) {
 	}
 
 	user := User{Phone: phone}
-	existed, err := adapter.Engine.Get(&user)
+	existed, err := engine.Get(&user)
 	return &user, existed, err
 }
 
@@ -86,7 +87,7 @@ func GetUserByUserId(userId string) (*User, bool, error) {
 	}
 
 	user := User{UserId: userId}
-	existed, err := adapter.Engine.Get(&user)
+	existed, err := engine.Get(&user)
 	return &user, existed, err
 }
 
@@ -108,7 +109,7 @@ func GetUserByName(name string) (user *User, existed bool, err error) {
 	}
 
 	queryUser := User{Name: name}
-	existed, err = adapter.Engine.Get(&queryUser)
+	existed, err = engine.Get(&queryUser)
 	user = &queryUser
 	return
 }

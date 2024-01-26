@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"yudai/object"
+
+	"github.com/spf13/viper"
 )
 
 const (
@@ -43,22 +45,31 @@ func init() {
 	loginActions[oauth2Pc] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
-			return config.Pc
+		configHandle: func() *object.WxLoginConfiguration {
+			return &object.WxLoginConfiguration{
+				AppID:     viper.GetString("wx_pc_app_id"),
+				AppSecret: viper.GetString("wx_pc_app_secret"),
+			}
 		},
 	}
 	loginActions[oauth2H5] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
-			return config.H5
+		configHandle: func() *object.WxLoginConfiguration {
+			return &object.WxLoginConfiguration{
+				AppID:     viper.GetString("wx_h5_app_id"),
+				AppSecret: viper.GetString("wx_h5_app_secret"),
+			}
 		},
 	}
 	loginActions[oauth2App] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func(config *object.WxLoginConfig) *object.WxLoginDetail {
-			return config.App
+		configHandle: func() *object.WxLoginConfiguration {
+			return &object.WxLoginConfiguration{
+				AppID:     viper.GetString("wx_app_app_id"),
+				AppSecret: viper.GetString("wx_app_app_secret"),
+			}
 		},
 	}
 	authActionMap[oauth2Pc] = func(authForm *AuthForm) (user *object.User, err error) {

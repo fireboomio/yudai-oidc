@@ -1,73 +1,49 @@
 package object
 
 import (
-	_ "github.com/denisenkom/go-mssqldb" // db = mssql
-	_ "github.com/go-sql-driver/mysql"   // db = mysql
-	"github.com/xorm-io/core"
-	"github.com/xorm-io/xorm"
-	"runtime"
-	"strconv"
+	"fmt"
+	"os"
+	"strings"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql" // db = mysql
+	_ "github.com/lib/pq"              // db = postgres
+	"github.com/spf13/viper"
+	"xorm.io/xorm"
+	"xorm.io/xorm/names"
 )
 
-// Adapter represents the MySQL adapter for policy storage.
-type Adapter struct {
-	driverName     string
-	dataSourceName string
-	dbName         string
-	Engine         *xorm.Engine
-}
-
-var adapter *Adapter
+var engine *xorm.Engine
 
 func InitAdapter() {
-	host := Conf.MySQLConfig.Host
-	port := strconv.Itoa(Conf.MySQLConfig.Port)
-	user := Conf.MySQLConfig.User
-	pwd := Conf.MySQLConfig.Password
-	dbName := Conf.MySQLConfig.DB
-	path := user + ":" + pwd + "@tcp" + "(" + host + ":" + port + ")" + "/"
-	adapter = NewAdapter("mysql", path, dbName)
-
-	tbMapper := core.NewPrefixMapper(core.SameMapper{}, "")
-	adapter.Engine.SetTableMapper(tbMapper)
-	adapter.Engine.DatabaseTZ = time.UTC
-}
-
-// NewAdapter is the constructor for Adapter.
-func NewAdapter(driverName string, dataSourceName string, dbName string) *Adapter {
-	a := &Adapter{}
-	a.driverName = driverName
-	a.dataSourceName = dataSourceName
-	a.dbName = dbName
-
-	// Open the DB, create it if not existed.
-	a.open()
-
-	// Call the destructor when the object is released.
-	runtime.SetFinalizer(a, finalizer)
-
-	return a
-}
-
-func finalizer(a *Adapter) {
-	err := a.Engine.Close()
-	if err != nil {
-		panic(err)
+	dbUrl := viper.GetString("db_url")
+	spits := strings.Split(dbUrl, "://")
+	var connStr string
+	if spits[0] == "postgres" {
+		connStr = dbUrl
+	} else if spits[0] == "mysql" {
+		connStr = spits[1]
+	} else {
+		fmt.Println("No YUDAI_DB_URL environment variable provided.")
+		os.Exit(10)
+		return
 	}
-}
-
-func (a *Adapter) open() {
-	dataSourceName := a.dataSourceName + a.dbName
-	engine, err := xorm.NewEngine(a.driverName, dataSourceName)
+	_engine, err := xorm.NewEngine(spits[0], connStr)
 	if err != nil {
-		panic(err)
+		fmt.Println("Error when initialize DB.", dbUrl, err)
+		os.Exit(11)
+		return
 	}
+	engine = _engine
+	dbPrefix := viper.GetString("db_prefix")
+	if dbPrefix != "" {
+		// remove last _ before append _
+		dbPrefix = strings.TrimSuffix(dbPrefix, "_") + "_"
+	}
+	tbMapper := names.NewPrefixMapper(names.GonicMapper{}, dbPrefix)
+	engine.SetTableMapper(tbMapper)
+	engine.SetColumnMapper(names.GonicMapper{})
+	engine.DatabaseTZ = time.UTC
 
-	a.Engine = engine
-}
-
-func (a *Adapter) close() {
-	_ = a.Engine.Close()
-	a.Engine = nil
+	engine.Sync(new(Token), new(Provider), new(User), new(UserSocial))
 }

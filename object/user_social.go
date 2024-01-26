@@ -21,7 +21,7 @@ func AddUserUserSocial(social *UserSocial) (int64, error) {
 	}
 
 	social.CreatedAt = time.Now()
-	return adapter.Engine.Insert(social)
+	return engine.Insert(social)
 }
 
 func UpdateUserSocial(userId, providerUserId string) (int64, error) {
@@ -29,7 +29,7 @@ func UpdateUserSocial(userId, providerUserId string) (int64, error) {
 		return 0, errors.New("Social用户ID为空")
 	}
 
-	return adapter.Engine.Where("provider_user_id=?", providerUserId).Update(&UserSocial{UserId: userId})
+	return engine.Where("provider_user_id=?", providerUserId).Update(&UserSocial{UserId: userId})
 }
 
 func GetUserSocialByProviderUserId(providerUserId string) (*UserSocial, bool, error) {
@@ -38,7 +38,7 @@ func GetUserSocialByProviderUserId(providerUserId string) (*UserSocial, bool, er
 	}
 
 	userSocial := UserSocial{ProviderUserId: providerUserId}
-	existed, err := adapter.Engine.Get(&userSocial)
+	existed, err := engine.Get(&userSocial)
 	return &userSocial, existed, err
 }
 
@@ -48,7 +48,7 @@ func GetUserSocialsByUserId(userId string, provider ...string) (data []*UserSoci
 		return
 	}
 
-	session := adapter.Engine.Where("user_id=?", userId)
+	session := engine.Where("user_id=?", userId)
 	if len(provider) > 0 {
 		session.In("provider", provider)
 	}

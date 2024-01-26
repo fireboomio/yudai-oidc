@@ -19,7 +19,7 @@ type Provider struct {
 func GetSmsProvider(id string) (*Provider, bool, error) {
 	owner, name, _ := strings.Cut(id, "/")
 	provider := Provider{Owner: owner, Name: name}
-	existed, err := adapter.Engine.Get(&provider)
+	existed, err := engine.Get(&provider)
 	return &provider, existed, err
 }
 
@@ -28,5 +28,5 @@ func UpdateSmsProvider(provider *Provider) (rows int64, err error) {
 		provider.Owner = "fireboom"
 	}
 
-	return adapter.Engine.Where("owner=? and name=?", provider.Owner, provider.Name).Update(provider)
+	return engine.Where("owner=? and name=?", provider.Owner, provider.Name).Update(provider)
 }
