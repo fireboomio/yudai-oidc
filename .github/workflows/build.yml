@@ -5,9 +5,9 @@ name: go-build
 permissions: {}
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "feat-env" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "feat-env" ]
 
 jobs:
 
@@ -35,5 +35,5 @@ jobs:
         r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         r2-bucket: ${{ secrets.R2_BUCKET }}
         source-dir: release
-        destination-dir: ./build    
+        destination-dir: ./build-env
     
