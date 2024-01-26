@@ -1,4 +1,4 @@
-create table oidc.admin_menu
+create table admin_menu
 (
     id            int auto_increment
         primary key,
@@ -14,11 +14,12 @@ create table oidc.admin_menu
     updatedAt     datetime                             not null,
     code          varchar(64)                          null,
     `schema`      text                                 null,
-    visibleInMenu tinyint(1) default 1                 not null
+    visibleInMenu tinyint(1) default 1                 not null,
+    apis          varchar(191)                         null
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.admin_role
+create table admin_role
 (
     id          int auto_increment
         primary key,
@@ -32,21 +33,7 @@ create table oidc.admin_role
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.admin_api_role
-(
-    id        int auto_increment
-        primary key,
-    path      varchar(256)                       not null,
-    method    varchar(16)                        not null,
-    createdAt datetime default CURRENT_TIMESTAMP not null,
-    roleId    int                                not null,
-    constraint admin_api_role_roleId_fkey
-        foreign key (roleId) references oidc.admin_role (id)
-            on update cascade on delete cascade
-)
-    collate = utf8mb4_general_ci;
-
-create table oidc.admin_menu_role
+create table admin_menu_role
 (
     id        int auto_increment
         primary key,
@@ -56,28 +43,61 @@ create table oidc.admin_menu_role
     constraint admin_menu_role_menuId_roleId_key
         unique (menuId, roleId),
     constraint admin_menu_role_menuId_fkey
-        foreign key (menuId) references oidc.admin_menu (id)
+        foreign key (menuId) references admin_menu (id)
             on update cascade on delete cascade,
     constraint admin_menu_role_roleId_fkey
-        foreign key (roleId) references oidc.admin_role (id)
+        foreign key (roleId) references admin_role (id)
             on update cascade on delete cascade
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.admin_role_user
+create table admin_role_user
 (
     id        int auto_increment
         primary key,
     createdAt datetime default CURRENT_TIMESTAMP not null,
     roleId    int                                not null,
     userId    varchar(36)                        not null,
+    constraint admin_role_user_roleId_userId_key
+        unique (roleId, userId),
     constraint admin_role_user_roleId_fkey
-        foreign key (roleId) references oidc.admin_role (id)
+        foreign key (roleId) references admin_role (id)
             on update cascade on delete cascade
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.demo_post_category
+create table demo_area
+(
+    id         int auto_increment
+        primary key,
+    createdAt  datetime    default CURRENT_TIMESTAMP not null,
+    name       varchar(64)                           not null,
+    address    text                                  null,
+    code       varchar(36)                           not null,
+    parentCode varchar(36) default ''                not null,
+    constraint demo_area_pk2
+        unique (code)
+);
+
+create table demo_area_role
+(
+    id        int auto_increment
+        primary key,
+    createdAt datetime default CURRENT_TIMESTAMP not null,
+    areaId    int                                not null,
+    roleId    int                                not null,
+    constraint demo_area_role_areaId_roleId_key
+        unique (areaId, roleId),
+    constraint demo_area_role_areaId_fkey
+        foreign key (areaId) references demo_area (id)
+            on update cascade on delete cascade,
+    constraint demo_area_role_roleId_fkey
+        foreign key (roleId) references admin_role (id)
+            on update cascade on delete cascade
+)
+    collate = utf8mb4_general_ci;
+
+create table demo_post_category
 (
     id          int auto_increment
         primary key,
@@ -88,7 +108,7 @@ create table oidc.demo_post_category
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.demo_post
+create table demo_post
 (
     id         int auto_increment
         primary key,
@@ -100,12 +120,12 @@ create table oidc.demo_post
     userId     varchar(36)                        not null,
     categoryId int                                not null,
     constraint demo_post_categoryId_fkey
-        foreign key (categoryId) references oidc.demo_post_category (id)
+        foreign key (categoryId) references demo_post_category (id)
             on update cascade on delete cascade
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.provider
+create table provider
 (
     owner         varchar(100)  not null,
     name          varchar(100)  not null,
@@ -121,7 +141,7 @@ create table oidc.provider
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.token
+create table token
 (
     id                  int auto_increment
         primary key,
@@ -136,7 +156,7 @@ create table oidc.token
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.user
+create table user
 (
     id            int auto_increment
         primary key,
@@ -150,12 +170,14 @@ create table oidc.user
     password      varchar(100) null,
     phone         char(13)     null,
     country_code  varchar(6)   null,
+    constraint user_unique_key
+        unique (user_id),
     constraint user_user_id_key
         unique (user_id)
 )
     comment '用户表' collate = utf8mb4_general_ci;
 
-create table oidc.admin_log
+create table admin_log
 (
     id        int auto_increment
         primary key,
@@ -171,12 +193,12 @@ create table oidc.admin_log
     requestId varchar(64)                        not null,
     body      text                               null,
     constraint admin_log_userId_fkey
-        foreign key (userId) references oidc.user (user_id)
+        foreign key (userId) references user (user_id)
             on update cascade on delete cascade
 )
     collate = utf8mb4_general_ci;
 
-create table oidc.usersocial
+create table usersocial
 (
     id                int auto_increment
         primary key,
@@ -190,7 +212,7 @@ create table oidc.usersocial
         unique (provider_user_id)
 );
 
-create table oidc.verificationrecord
+create table verificationrecord
 (
     name         varchar(100) not null
         primary key,
