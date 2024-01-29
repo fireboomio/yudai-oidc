@@ -52,6 +52,7 @@ func AddUser(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, Response{
 		Code: http.StatusOK,
 		Msg:  fmt.Sprintf("affected:%d ", affected),
+		Data: user.UserId,
 	})
 }
 
