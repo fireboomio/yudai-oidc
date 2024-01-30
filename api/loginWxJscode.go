@@ -23,8 +23,8 @@ func init() {
 		url: jscodeUrl,
 		configHandle: func() *object.WxLoginConfiguration {
 			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString("wx_mini_app_id"),
-				AppSecret: viper.GetString("wx_mini_app_secret"),
+				AppID:     viper.GetString(object.ENV_WX_MINI_APP_ID),
+				AppSecret: viper.GetString(object.ENV_WX_MINI_APP_SECRET),
 			}
 		},
 		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
