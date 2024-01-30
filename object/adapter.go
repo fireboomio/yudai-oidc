@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"yudai/object"
 
 	_ "github.com/go-sql-driver/mysql" // db = mysql
 	_ "github.com/lib/pq"              // db = postgres
@@ -17,7 +16,7 @@ import (
 var engine *xorm.Engine
 
 func InitAdapter() {
-	dbUrl := viper.GetString(object.ENV_DB_URL)
+	dbUrl := viper.GetString(ENV_DB_URL)
 	spits := strings.Split(dbUrl, "://")
 	var connStr string
 	if spits[0] == "postgres" {
@@ -36,7 +35,7 @@ func InitAdapter() {
 		return
 	}
 	engine = _engine
-	dbPrefix := viper.GetString(object.ENV_DB_PREFIX)
+	dbPrefix := viper.GetString(ENV_DB_PREFIX)
 	if dbPrefix != "" {
 		// remove last _ before append _
 		dbPrefix = strings.TrimSuffix(dbPrefix, "_") + "_"

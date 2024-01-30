@@ -1,8 +1,6 @@
 package object
 
 import (
-	"yudai/object"
-
 	"github.com/spf13/viper"
 )
 
@@ -14,6 +12,6 @@ type WxLoginConfiguration struct {
 func Init() (err error) {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("YUDAI")
-	viper.SetDefault(object.ENV_PORT, 9825)
+	viper.SetDefault(ENV_PORT, 9825)
 	return
 }
