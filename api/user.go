@@ -44,7 +44,7 @@ func AddUser(c echo.Context) (err error) {
 		}
 	}
 
-	affected, err := object.AddUser(&user)
+	affected, userId, err := object.AddUser(&user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
@@ -52,7 +52,7 @@ func AddUser(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, Response{
 		Code: http.StatusOK,
 		Msg:  fmt.Sprintf("affected:%d ", affected),
-		Data: user.UserId,
+		Data: userId,
 	})
 }
 
@@ -143,7 +143,7 @@ func UpdateUser(c echo.Context) (err error) {
 
 	var affected int64
 	if createRequired {
-		affected, err = object.AddUser(&updatedUser.User)
+		affected, _, err = object.AddUser(&updatedUser.User)
 	} else {
 		affected, err = object.UpdateUser(&updatedUser.User)
 	}

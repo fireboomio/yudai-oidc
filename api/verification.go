@@ -48,7 +48,7 @@ func SendVerificationCode(c echo.Context) (err error) {
 		}
 		defer func() {
 			if c.Response().Status == http.StatusOK {
-				_, _ = object.AddUser(user)
+				_, _, _ = object.AddUser(user)
 			}
 		}()
 	}

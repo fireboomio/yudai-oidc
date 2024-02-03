@@ -27,7 +27,7 @@ type User struct {
 	SocialUserId string `xorm:"-" json:"socialUserId,omitempty"`
 }
 
-func AddUser(user *User) (int64, error) {
+func AddUser(user *User) (int64, string, error) {
 	var err error
 	if user.UserId == "" {
 		user.UserId = uuid.NewString()
@@ -42,10 +42,10 @@ func AddUser(user *User) (int64, error) {
 	fillUserInfo(user)
 	affected, err := engine.Insert(user)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 
-	return affected, nil
+	return affected, user.UserId, nil
 }
 
 func UpdateUser(user *User) (int64, error) {
