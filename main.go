@@ -23,7 +23,7 @@ func main() {
 
 	object.InitAdapter()
 	r := NewRouter()
-	port := viper.GetInt("port")
+	port := viper.GetInt(object.ENV_PORT)
 	r.Logger.Fatal(r.Start(fmt.Sprintf(":%d", port)))
 }
 

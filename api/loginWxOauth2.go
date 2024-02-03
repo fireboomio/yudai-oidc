@@ -47,8 +47,8 @@ func init() {
 		respHandle: respHandle,
 		configHandle: func() *object.WxLoginConfiguration {
 			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString("wx_pc_app_id"),
-				AppSecret: viper.GetString("wx_pc_app_secret"),
+				AppID:     viper.GetString(object.ENV_WX_PC_APP_ID),
+				AppSecret: viper.GetString(object.ENV_WX_PC_APP_SECRET),
 			}
 		},
 	}
@@ -57,8 +57,8 @@ func init() {
 		respHandle: respHandle,
 		configHandle: func() *object.WxLoginConfiguration {
 			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString("wx_h5_app_id"),
-				AppSecret: viper.GetString("wx_h5_app_secret"),
+				AppID:     viper.GetString(object.ENV_WX_H5_APP_ID),
+				AppSecret: viper.GetString(object.ENV_WX_H5_APP_SECRET),
 			}
 		},
 	}

@@ -12,6 +12,6 @@ type WxLoginConfiguration struct {
 func Init() (err error) {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("YUDAI")
-	viper.SetDefault("port", 9825)
+	viper.SetDefault(ENV_PORT, 9825)
 	return
 }

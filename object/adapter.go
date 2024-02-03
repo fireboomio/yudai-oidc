@@ -16,7 +16,7 @@ import (
 var engine *xorm.Engine
 
 func InitAdapter() {
-	dbUrl := viper.GetString("db_url")
+	dbUrl := viper.GetString(ENV_DB_URL)
 	spits := strings.Split(dbUrl, "://")
 	var connStr string
 	if spits[0] == "postgres" {
@@ -35,7 +35,7 @@ func InitAdapter() {
 		return
 	}
 	engine = _engine
-	dbPrefix := viper.GetString("db_prefix")
+	dbPrefix := viper.GetString(ENV_DB_PREFIX)
 	if dbPrefix != "" {
 		// remove last _ before append _
 		dbPrefix = strings.TrimSuffix(dbPrefix, "_") + "_"
