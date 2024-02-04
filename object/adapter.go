@@ -42,7 +42,7 @@ func InitAdapter() {
 	}
 	tbMapper := names.NewPrefixMapper(names.GonicMapper{}, dbPrefix)
 	engine.SetTableMapper(tbMapper)
-	engine.SetColumnMapper(names.GonicMapper{})
+	// engine.SetColumnMapper(names.GonicMapper{})
 	engine.DatabaseTZ = time.UTC
 
 	engine.Sync(new(Token), new(Provider), new(User), new(UserSocial))
