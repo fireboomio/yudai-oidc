@@ -198,7 +198,7 @@ create table admin_log
 )
     collate = utf8mb4_general_ci;
 
-create table usersocial
+create table user_social
 (
     id                int auto_increment
         primary key,
@@ -212,7 +212,7 @@ create table usersocial
         unique (provider_user_id)
 );
 
-create table verificationrecord
+create table verification_record
 (
     name         varchar(100) not null
         primary key,
