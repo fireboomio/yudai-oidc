@@ -37,7 +37,7 @@ type Token struct {
 func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err error) {
 	// Create the Claims
 	nowTime := time.Now()
-	expireAt := nowTime.Add(24 * time.Hour)
+	expireAt := nowTime.Add(24 * 30 * time.Hour)
 
 	claims := Claims{
 		User:      user,
