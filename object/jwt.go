@@ -104,7 +104,8 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 
 	if platform.Exclusive {
 		if _, err = engine.
-			Where("banned=0 and expire_time>?", nowTime.Format(time.DateTime)).
+			Where("banned=?", false).
+			Where("expire_time>?", nowTime.Format(time.DateTime)).
 			In("user_id", []string{user.UserId}).
 			In("platform", []string{"", platform.Platform}).
 			NotIn("token", []string{tokenString}).
