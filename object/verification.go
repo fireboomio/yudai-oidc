@@ -57,7 +57,7 @@ func IsAllowSend(user *User, recordType string) error {
 func CheckVerificationCode(dest, code string) *VerifyResult {
 	record, err := getVerificationRecord(dest)
 	if err != nil {
-		panic(err)
+		return &VerifyResult{noRecordError, err.Error()}
 	}
 
 	if record == nil {
@@ -65,10 +65,6 @@ func CheckVerificationCode(dest, code string) *VerifyResult {
 	}
 
 	var timeout int64 = 10
-	if err != nil {
-		panic(err)
-	}
-
 	now := time.Now().Unix()
 	if now-record.Time > timeout*60 {
 		return &VerifyResult{timeoutError, fmt.Sprintf("您应该在%d分钟内验证您的验证码!", timeout)}
