@@ -29,10 +29,10 @@ type Token struct {
 	Id                int       `xorm:"id pk autoincr" json:"id"`
 	Platform          string    `xorm:"platform varchar(36)" json:"platform"`
 	UserId            string    `xorm:"user_id varchar(36) notnull" json:"userId"`
-	Token             string    `xorm:"token varchar(255) notnull" json:"token"`
-	CreatedAt         string    `xorm:"created_at datetime notnull" json:"createdAt"`
+	Token             string    `xorm:"token text notnull" json:"token"`
+	CreatedAt         time.Time `xorm:"created_at datetime notnull" json:"createdAt"`
 	ExpireTime        time.Time `xorm:"expire_time datetime" json:"expireTime"`
-	RefreshToken      string    `xorm:"refresh_token varchar(255)" json:"refreshToken"`
+	RefreshToken      string    `xorm:"refresh_token text" json:"refreshToken"`
 	RefreshExpireTime time.Time `xorm:"refresh_expire_time datetime" json:"refreshExpireTime"`
 	Banned            bool      `xorm:"banned bool" json:"banned"`
 }
@@ -80,6 +80,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	refreshTokenString, err := refreshToken.SignedString(key)
 
 	at := &Token{
+		CreatedAt:         nowTime,
 		Platform:          platform.Platform,
 		UserId:            user.UserId,
 		Token:             tokenString,
