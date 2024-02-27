@@ -26,13 +26,15 @@ type PlatformConfig struct {
 }
 
 type Token struct {
-	Platform          string    `xorm:"varchar(36)" json:"platform"`
-	UserId            string    `xorm:"varchar(255)" json:"userId"`
-	Token             string    `xorm:"varchar(255)" json:"token"`
-	ExpireTime        time.Time `xorm:"varchar(100)" json:"expire_time"`
-	RefreshToken      string    `xorm:"varchar(255)" json:"refresh_token"`
-	RefreshExpireTime time.Time `xorm:"varchar(100)" json:"refresh_expire_time"`
-	Banned            bool      `xorm:"bool" json:"banned"`
+	Id                int       `xorm:"id pk autoincr" json:"id"`
+	Platform          string    `xorm:"platform varchar(36)" json:"platform"`
+	UserId            string    `xorm:"user_id varchar(36) notnull" json:"userId"`
+	Token             string    `xorm:"token varchar(255) notnull" json:"token"`
+	CreatedAt         string    `xorm:"created_at datetime notnull" json:"createdAt"`
+	ExpireTime        time.Time `xorm:"expire_time datetime" json:"expireTime"`
+	RefreshToken      string    `xorm:"refresh_token varchar(255)" json:"refreshToken"`
+	RefreshExpireTime time.Time `xorm:"refresh_expire_time datetime" json:"refreshExpireTime"`
+	Banned            bool      `xorm:"banned bool" json:"banned"`
 }
 
 func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err error) {

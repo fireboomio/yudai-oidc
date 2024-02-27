@@ -6,12 +6,13 @@ import (
 )
 
 type UserSocial struct {
-	UserId           string    `xorm:"varchar(36) null" json:"userId,omitempty"`
-	Provider         string    `xorm:"varchar(64) not null" json:"provider"`
-	ProviderUserId   string    `xorm:"varchar(64) not null" json:"providerUserId"`
-	ProviderPlatform string    `xorm:"varchar(64) null" json:"providerPlatform,omitempty"`
-	ProviderUnionid  string    `xorm:"varchar(64) null" json:"providerUnionid,omitempty"`
-	CreatedAt        time.Time `xorm:"varchar(100) index" json:"createdAt"`
+	Id               int       `xorm:"id pk autoincr" json:"id"`
+	UserId           string    `xorm:"user_id varchar(36)" json:"userId,omitempty"`
+	Provider         string    `xorm:"provider varchar(64) not null" json:"provider"`
+	ProviderUserId   string    `xorm:"provider_user_id varchar(64) not null" json:"providerUserId"`
+	ProviderPlatform string    `xorm:"provider_platform varchar(64)" json:"providerPlatform,omitempty"`
+	ProviderUnionid  string    `xorm:"provider_unionid varchar(64)" json:"providerUnionid,omitempty"`
+	CreatedAt        time.Time `xorm:"created_at datetime index" json:"createdAt"`
 }
 
 func AddUserUserSocial(social *UserSocial) (int64, error) {

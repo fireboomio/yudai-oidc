@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-	"yudai/util"
-
-	"github.com/google/uuid"
 	"xorm.io/xorm/schemas"
 )
 
@@ -19,16 +16,14 @@ const (
 )
 
 type VerificationRecord struct {
-	Name        string `xorm:"varchar(100) notnull pk" json:"name"`
-	CreatedTime string `xorm:"varchar(100)" json:"createdTime"`
-
-	Type     string `xorm:"varchar(10)"`
-	User     string `xorm:"varchar(100) notnull"`
-	Provider string `xorm:"varchar(100) notnull"`
-	Receiver string `xorm:"varchar(100) notnull"`
-	Code     string `xorm:"varchar(10) notnull"`
-	Time     int64  `xorm:"notnull"`
-	IsUsed   bool
+	Id        int       `xorm:"id pk autoincr" json:"id"`
+	CreatedAt time.Time `xorm:"created_at datetime notnull" json:"createdAt"`
+	Type      string    `xorm:"type varchar(10)" json:"type,omitempty"`
+	UserId    string    `xorm:"user_id varchar(36) notnull" json:"userId"`
+	Provider  string    `xorm:"provider varchar(100) notnull" json:"provider"`
+	Receiver  string    `xorm:"receiver varchar(100) notnull" json:"receiver"`
+	Code      string    `xorm:"code varchar(10) notnull" json:"code"`
+	IsUsed    bool      `xorm:"is_used bool" json:"isUsed,omitempty"`
 }
 
 type VerifyResult struct {
@@ -40,15 +35,15 @@ func IsAllowSend(user *User, recordType string) error {
 	var record VerificationRecord
 	record.Type = recordType
 	if user != nil {
-		record.User = user.Name
+		record.UserId = user.UserId
 	}
-	has, err := engine.Desc("created_time").Get(&record)
+	has, err := engine.Desc("created_at").Get(&record)
 	if err != nil {
 		return err
 	}
 
 	now := time.Now().Unix()
-	if has && now-record.Time < 60 {
+	if has && now-record.CreatedAt.Unix() < 60 {
 		return errors.New("you can only send one code in 60s")
 	}
 
@@ -71,7 +66,7 @@ func CheckVerificationCode(dest, code string) *VerifyResult {
 	}
 
 	now := time.Now().Unix()
-	if now-record.Time > timeout*60 {
+	if now-record.CreatedAt.Unix() > timeout*60 {
 		return &VerifyResult{timeoutError, fmt.Sprintf("您应该在%d分钟内验证您的验证码!", timeout)}
 	}
 
@@ -118,16 +113,13 @@ func SendVerificationCodeToPhone(user *User, provider *Provider, remoteAddr stri
 func AddToVerificationRecord(user *User, provider *Provider, dest, code string) error {
 	var record VerificationRecord
 	if user != nil {
-		record.User = user.Name
+		record.UserId = user.UserId
 	}
-	record.CreatedTime = util.GetCurrentTime()
+	record.CreatedAt = time.Now()
 
 	record.Provider = provider.Name
 	record.Receiver = dest
 	record.Code = code
-	record.Name = uuid.NewString()
-	record.Time = time.Now().Unix()
-	record.IsUsed = false
 
 	_, err := engine.Insert(record)
 	if err != nil {
@@ -144,7 +136,7 @@ func DisableVerificationCode(dest string) (err error) {
 	}
 
 	record.IsUsed = true
-	_, err = engine.ID(schemas.PK{record.Name}).AllCols().Update(record)
+	_, err = engine.ID(schemas.PK{record.Id}).AllCols().Update(record)
 	return
 }
 

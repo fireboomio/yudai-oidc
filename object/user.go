@@ -11,18 +11,19 @@ import (
 )
 
 type User struct {
-	UserId    string    `xorm:"varchar(255)" json:"userId"`
-	Avatar    string    `xorm:"varchar(255)" json:"avatar"`
-	CreatedAt time.Time `xorm:"varchar(100)" json:"created_at"`
-	UpdatedAt time.Time `xorm:"varchar(100)" json:"updated_at"`
+	Id        int       `xorm:"id pk autoincr" json:"id"`
+	UserId    string    `xorm:"user_id varchar(36) notnull" json:"userId"`
+	Avatar    string    `xorm:"avatar varchar(255)" json:"avatar"`
+	CreatedAt time.Time `xorm:"created_at datetime notnull" json:"createdAt"`
+	UpdatedAt time.Time `xorm:"updated_at datetime" json:"updatedAt"`
 
-	Name         string `xorm:"varchar(100) index" json:"name"`
-	Password     string `xorm:"varchar(100)" json:"password"`
-	PasswordSalt string `xorm:"varchar(100)" json:"passwordSalt"`
-	PasswordType string `xorm:"varchar(100)" json:"passwordType"`
+	Name         string `xorm:"name varchar(64) index" json:"name"`
+	Password     string `xorm:"password varchar(100)" json:"password"`
+	PasswordSalt string `xorm:"password_salt varchar(100)" json:"passwordSalt"`
+	PasswordType string `xorm:"password_type varchar(100)" json:"passwordType"`
 
-	Phone       string `xorm:"varchar(20) index" json:"phone,omitempty"`
-	CountryCode string `xorm:"varchar(6)" json:"countryCode,omitempty"`
+	Phone       string `xorm:"phone varchar(20) index" json:"phone,omitempty"`
+	CountryCode string `xorm:"country_code varchar(6)" json:"countryCode,omitempty"`
 
 	SocialUserId string `xorm:"-" json:"socialUserId,omitempty"`
 }
