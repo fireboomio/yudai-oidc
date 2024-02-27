@@ -45,5 +45,5 @@ func InitAdapter() {
 	// engine.SetColumnMapper(names.GonicMapper{})
 	engine.DatabaseTZ = time.UTC
 
-	engine.Sync(new(Token), new(Provider), new(User), new(UserSocial))
+	engine.Sync(new(Token), new(Provider), new(User), new(UserSocial), new(VerificationRecord))
 }
