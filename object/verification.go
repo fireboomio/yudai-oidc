@@ -139,7 +139,7 @@ func DisableVerificationCode(dest string) (err error) {
 func getVerificationRecord(dest string) (*VerificationRecord, error) {
 	var record VerificationRecord
 	record.Receiver = dest
-	has, err := engine.Desc("created_at").Where("is_used = 0").Get(&record)
+	has, err := engine.Desc("created_at").Where("is_used=?", false).Get(&record)
 	if err != nil {
 		return nil, err
 	}
