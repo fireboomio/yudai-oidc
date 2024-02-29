@@ -23,10 +23,10 @@ type (
 	}
 )
 
-var loginActions = make(map[string]*loginAction)
+var wxLoginActions = make(map[string]*loginAction)
 
 func loginWx(actionType, code string) (user *object.User, err error) {
-	action, ok := loginActions[actionType]
+	action, ok := wxLoginActions[actionType]
 	if !ok {
 		return
 	}

@@ -19,7 +19,7 @@ type jscodeResp struct {
 }
 
 func init() {
-	loginActions[mini] = &loginAction{
+	wxLoginActions[mini] = &loginAction{
 		url: jscodeUrl,
 		configHandle: func() *object.WxLoginConfiguration {
 			return &object.WxLoginConfiguration{

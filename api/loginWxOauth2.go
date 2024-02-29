@@ -42,7 +42,7 @@ func init() {
 		}
 		return
 	}
-	loginActions[oauth2Pc] = &loginAction{
+	wxLoginActions[oauth2Pc] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
 		configHandle: func() *object.WxLoginConfiguration {
@@ -52,7 +52,7 @@ func init() {
 			}
 		},
 	}
-	loginActions[oauth2H5] = &loginAction{
+	wxLoginActions[oauth2H5] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
 		configHandle: func() *object.WxLoginConfiguration {
@@ -62,13 +62,13 @@ func init() {
 			}
 		},
 	}
-	loginActions[oauth2App] = &loginAction{
+	wxLoginActions[oauth2App] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
 		configHandle: func() *object.WxLoginConfiguration {
 			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString("wx_app_app_id"),
-				AppSecret: viper.GetString("wx_app_app_secret"),
+				AppID:     viper.GetString(object.ENV_WX_APP_APP_ID),
+				AppSecret: viper.GetString(object.ENV_WX_APP_APP_SECRET),
 			}
 		},
 	}
