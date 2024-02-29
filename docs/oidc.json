@@ -372,6 +372,16 @@
           "User Operations"
         ],
         "summary": "Get user info",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -435,16 +445,27 @@
       "UserInfo": {
         "type": "object",
         "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
           "phone": {
             "type": "string"
           },
-          "preferred_username": {
+          "avatar": {
+            "type": "string"
+          },
+          "socialUserId": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "userId",
+          "name"
+        ]
       }
     }
   }
 }
-
-    

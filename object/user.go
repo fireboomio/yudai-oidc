@@ -29,7 +29,6 @@ type User struct {
 }
 
 type Userinfo struct {
-	Sub          string        `json:"sub"`
 	UserId       string        `json:"userId"`
 	Name         string        `json:"name"`
 	Phone        string        `json:"phone,omitempty"`
@@ -40,7 +39,6 @@ type Userinfo struct {
 
 func (u *User) Transform() *Userinfo {
 	return &Userinfo{
-		Sub:          u.UserId,
 		UserId:       u.UserId,
 		Name:         u.Name,
 		Phone:        u.Phone,
