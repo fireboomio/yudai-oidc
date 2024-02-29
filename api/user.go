@@ -68,14 +68,15 @@ func UpdateUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	var prepareUpdateUser *object.User
+	var prepareUpdateUser *object.Userinfo
 	if len(updatedUser.UserId) > 0 {
-		var exited bool
-		if prepareUpdateUser, exited, _ = object.GetUserByUserId(updatedUser.UserId); !exited {
+		existedUser, existed, _ := object.GetUserByUserId(updatedUser.UserId)
+		if !existed {
 			return c.JSON(http.StatusBadRequest, Response{Msg: "用户不存在"})
 		}
+		prepareUpdateUser = existedUser.Transform()
 	} else {
-		prepareUpdateUser = c.Get("user").(*object.User)
+		prepareUpdateUser = c.Get("user").(*object.Userinfo)
 		updatedUser.UserId = prepareUpdateUser.UserId
 	}
 	if len(updatedUser.Name) > 0 {
@@ -132,7 +133,7 @@ func UpdateUser(c echo.Context) (err error) {
 					if _, err = object.UpdateUserSocial(existedPhoneUser.UserId, socialUser.ProviderUserId); err != nil {
 						return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 					}
-					changeUserToken, _ = object.GenerateToken(existedPhoneUser, updatedUser.PlatformConfig)
+					changeUserToken, _ = object.GenerateToken(existedPhoneUser.Transform(), updatedUser.PlatformConfig)
 				}
 			}
 			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {

@@ -7,11 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Userinfo struct {
-	Sub     string               `json:"sub"`
-	Socials []*object.UserSocial `json:"socials"`
-}
-
 func GetJwks(c echo.Context) (err error) {
 	jwks, err := object.GetJsonWebKeySet()
 	if err != nil {
@@ -29,11 +24,8 @@ func GetJwks(c echo.Context) (err error) {
 //	@Success		200		{object}	object.Userinfo	成功
 //	@router			/userinfo [get]
 func GetUserInfo(c echo.Context) (err error) {
-	user := c.Get("user").(*object.User)
-	userinfo := &Userinfo{
-		Sub: user.UserId,
-	}
-	userinfo.Socials, _ = object.GetUserSocialsByUserId(user.UserId)
+	userinfo := c.Get("user").(*object.Userinfo)
+	userinfo.Socials, _ = object.GetUserSocialsByUserId(userinfo.UserId)
 	return c.JSON(http.StatusOK, userinfo)
 }
 

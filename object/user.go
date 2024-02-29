@@ -28,6 +28,27 @@ type User struct {
 	SocialUserId string `xorm:"-" json:"socialUserId,omitempty"`
 }
 
+type Userinfo struct {
+	Sub          string        `json:"sub"`
+	UserId       string        `json:"userId"`
+	Name         string        `json:"name"`
+	Phone        string        `json:"phone,omitempty"`
+	Avatar       string        `json:"avatar,omitempty"`
+	SocialUserId string        `json:"socialUserId,omitempty"`
+	Socials      []*UserSocial `json:"socials,omitempty"`
+}
+
+func (u *User) Transform() *Userinfo {
+	return &Userinfo{
+		Sub:          u.UserId,
+		UserId:       u.UserId,
+		Name:         u.Name,
+		Phone:        u.Phone,
+		Avatar:       u.Avatar,
+		SocialUserId: u.SocialUserId,
+	}
+}
+
 func AddUser(user *User) (int64, string, error) {
 	var err error
 	if user.UserId == "" {

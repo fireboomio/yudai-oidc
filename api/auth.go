@@ -68,7 +68,7 @@ func Login(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	tokenRes, err := object.GenerateToken(user, authForm.PlatformConfig)
+	tokenRes, err := object.GenerateToken(user.Transform(), authForm.PlatformConfig)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}

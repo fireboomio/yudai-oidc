@@ -9,8 +9,8 @@ import (
 )
 
 type Claims struct {
-	User      *User  `json:"username"`
-	TokenType string `json:"tokenType,omitempty"`
+	User      *Userinfo `json:"username"`
+	TokenType string    `json:"tokenType,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -37,16 +37,16 @@ type Token struct {
 	Banned            bool      `xorm:"banned bool" json:"banned"`
 }
 
-func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err error) {
+func GenerateToken(userinfo *Userinfo, platform PlatformConfig) (res *TokenRes, err error) {
 	// Create the Claims
 	nowTime := time.Now()
 	expireAt := nowTime.Add(24 * time.Hour)
 
 	claims := Claims{
-		User:      user,
+		User:      userinfo,
 		TokenType: "access-token",
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   user.UserId,
+			Subject:   userinfo.UserId,
 			NotBefore: jwt.NewNumericDate(nowTime),
 			IssuedAt:  jwt.NewNumericDate(nowTime),
 			ExpiresAt: jwt.NewNumericDate(expireAt),
@@ -82,7 +82,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 	at := &Token{
 		CreatedAt:         nowTime,
 		Platform:          platform.Platform,
-		UserId:            user.UserId,
+		UserId:            userinfo.UserId,
 		Token:             tokenString,
 		ExpireTime:        expireAt,
 		RefreshToken:      refreshTokenString,
@@ -106,7 +106,7 @@ func GenerateToken(user *User, platform PlatformConfig) (res *TokenRes, err erro
 		if _, err = engine.
 			Where("banned=?", false).
 			Where("expire_time>?", nowTime.Format(time.DateTime)).
-			In("user_id", []string{user.UserId}).
+			In("user_id", []string{userinfo.UserId}).
 			In("platform", []string{"", platform.Platform}).
 			NotIn("token", []string{tokenString}).
 			SetExpr("banned", true).
