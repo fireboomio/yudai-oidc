@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 datetime=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+mkdir -p release
 echo "$datetime" > release/build_time
 
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o release/yudai-mac main.go
