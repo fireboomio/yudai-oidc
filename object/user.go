@@ -30,6 +30,7 @@ type User struct {
 
 type Userinfo struct {
 	UserId       string        `json:"userId"`
+	Subject      string        `json:"sub"`
 	Name         string        `json:"name"`
 	Phone        string        `json:"phone,omitempty"`
 	Avatar       string        `json:"avatar,omitempty"`
@@ -39,6 +40,7 @@ type Userinfo struct {
 
 func (u *User) Transform() *Userinfo {
 	return &Userinfo{
+		Subject:      u.UserId,
 		UserId:       u.UserId,
 		Name:         u.Name,
 		Phone:        u.Phone,
