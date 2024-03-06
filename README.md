@@ -6,7 +6,7 @@
 
 ## 功能介绍
 
-我们初期参考了`Casdoor`的功能进行设计，目标是开发一款精简的符合`OIDC`协议的登录认证服务，将其作为`OpenAPI`数据源注册到飞步，支持手机短信登录和密码登录等。
+我们初期参考了`Casdoor`的功能进行设计，目标是开发一款精简的符合`OIDC`协议的登录认证服务，将其作为`OpenAPI`数据源注册到[飞布 Fireboom](https://www.fireboom.cloud/zh)，支持手机短信登录和密码登录等。
 
 > OIDC 是一种用于身份验证和授权的开放式协议。它建立在OAuth 2.0基础上，并为第三方应用程序提供了一种方便的方法来验证用户身份并获取用户信息，例如名称、邮件地址等。OIDC还支持单点登录（SSO），以便用户只需在一个地方登录，就可以访问多个应用程序。
 
@@ -17,17 +17,19 @@
 ### 安装：
 
 ```sh
-curl -o ./yudai https://yudai-bin.fireboom.io/build/yudai-linux
+# Linux
+curl -o ./yudai https://yudai-bin.fireboom.io/build-env/yudai-linux
+# Mac
+curl -o ./yudai https://yudai-bin.fireboom.io/build-env/yudai-mac
+# Windows
+curl -o ./yudai.exe https://yudai-bin.fireboom.io/build-env/yudai-windows.exe
+
+chmod +x ./yudai
 ```
 
 ### 数据库初始化
 
-~~数据库脚本位于[oidc.sql](docs/oidc.sql), 请在Mysql数据库中执行。~~
-请先准备好数据库，目前`YuDai`支持`mysql`和`postgres`，考虑到实际业务场景，我们暂时不打算支持`sqlite`数据库。以`Docker`启动`postgres`为例（实际业务请修改相关配置）：
-
-```sh
-docker run -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_DB=yudai -p 5432:5432 -d postgres
-```
+请先准备好数据库，目前`YuDai`支持`mysql`和`postgres`，考虑到实际业务场景，我们暂时不打算支持`sqlite`数据库。
 
 `YuDai`服务启动后会自动同步表信息到数据库，所以不需要初始化表结构。
 
@@ -49,95 +51,21 @@ docker run -e POSTGRES_PASSWORD=password -e POSTGRES_USER=postgres -e POSTGRES_D
 
 ### 短信配置
 
-执行完sql之后，在provider表中配置短信的相关信息。
+在provider表中配置短信的相关信息。
 
-```Go
-package objcet
-
-type Provider struct {
-	Owner       string `xorm:"varchar(100) notnull pk" json:"owner"`       // 创建者
-	Name        string `xorm:"varchar(100) notnull pk unique" json:"name"` // 名称
-	CreatedTime string `xorm:"varchar(100)" json:"createdTime"`            // 创建时间
-
-	Type         string `xorm:"varchar(100)" json:"type"`          // 类型
-	ClientId     string `xorm:"varchar(100)" json:"clientId"`      // 客户端ID
-	ClientSecret string `xorm:"varchar(2000)" json:"clientSecret"` // 客户端秘钥
-	SignName     string `xorm:"varchar(100)" json:"signName"`      // 签名名称
-	TemplateCode string `xorm:"varchar(100)" json:"templateCode"`  // 模板code
-}
-```
-
-在object/sms.go中会获取sms短信提供方的相关信息用于短信发送。
-
-在api/verification.go会根据获取到的sms信息进行短信的发送。
-
-### 架构图
-
-[前往阅读](https://docs.fireboom.io/v/v1.0/ji-chu-ke-shi-hua-kai-fa/shen-fen-yan-zheng/yin-shi-mo-shi#gong-zuo-yuan-li)
-
-## 登录功能
-
-调用方式参考swagger文档 [oidc.json](docs/oidc.json)
-
-### 账户密码登录
-```
-POST /api/login
-{
-  "username": "admin",
-  "password": "123456",
-  "loginType": "password"
-}
-```
-
-### 手机号验证码登录
-```
-POST /api/login
-{
-  "phone": "13800138000",
-  "code": "123456",
-  "loginType": "phone"
-}
-```
-
-### 微信公众号h5登录
-```
-POST /api/login
-{
-  "code": "code",
-  "loginType": "h5"
-}
-```
-
-### 微信pc扫码登录
-```
-POST /api/login
-{
-  "code": "code",
-  "loginType": "pc"
-}
-```
-
-### 微信小程序登录
-```
-POST /api/login
-{
-  "code": "code",
-  "loginType": "mini"
-}
-```
-
-### 微信app登录
-```
-POST /api/login
-{
-  "code": "code",
-  "loginType": "app"
-}
+```sql
+INSERT INTO "provider" ("owner", "name", "created_at", "type", "client_id", "client_secret", "sign_name", "template_code") VALUES ('your_name', 'provider_sms', '2023-01-17 01:22:33', 'Aliyun SMS', 'xxxxxxxxxxxxxxxx', 'xxxxxxxxxxxxxxxxxxxxxxxxxxx', 'app_name', 'temp_code');
 ```
 
 ### 密钥生成
 
-在 `object.jwks.go` 中需要初始化 cert, 启动项目后在 `object.jwks.go` 程序初始化时会查找项目根目录下的两个文件（用于OIDC服务发现的private key 和 certificate），如果没有会在初始化时生成这两个文件。
+`YuDai`默认会在`cert`目录下生成`token_jwt_key.key`和`token_jwt_key.pem`两个文件，用于生成JWT签名和验证，如果这2个文件不存在会自动生成，但每次重新生成会导致之前的jwt失效，因此在正式项目使用中可以通过 Volume 挂载的方式保持这2个文件不变。
+
+### 启动
+
+```sh
+./yudai
+```
 
 ## 如何和fireboom结合
 
@@ -160,6 +88,10 @@ POST /api/login
 
 ![img](https://cos.ap-nanjing.myqcloud.com/test-1314985928/admin/image.png)
 
+### Restful API
+
+当需要在飞布中以`Restful API`的方式调用`YuDai`时，可以参考[swagger.json](docs/oidc.json)
+
 ### 补充：
 
 > JWKS (JSON Web Key Set) 代表了用于身份验证和授权的一组JSON格式的Web密钥。它是OAuth 2.0和OpenID Connect等身份验证和授权协议中的一部分。JWKS通常用于在安全的方式下公开API的公钥和其他安全参数。
@@ -174,7 +106,7 @@ POST /api/login
 
 前端请求登录接口，验证成功后会返回`access_token`、`refresh_token`和对应的过期时间。前端将`access_token`值、`access_token`过期时间、`refresh_token`值与`refresh_token`的过期时间存储到`localStorage`里。
 
-当请求非白名单的接口时，从`cookie`中取出`access_token`值与其过期时间.首先检验是否过期，若过期，则读取`refresh_token`与其对应的过期时间，若refreshToken没有过期，则携带`refresh_token`去请求响应的接口，获取新的`access_token`和新的`refresh_token`，并携带新的`access_token`去请求接口，若`refresh_token`也过期，则跳转到登录页面。
+当请求非白名单的接口时，从`localStorage`中取出`access_token`值与其过期时间.首先检验是否过期，若过期，则读取`refresh_token`与其对应的过期时间，若refreshToken没有过期，则携带`refresh_token`去请求响应的接口，获取新的`access_token`和新的`refresh_token`，并携带新的`access_token`去请求接口，若`refresh_token`也过期，则跳转到登录页面。
 
 前端也可以不存储过期时间，全部由接口是否返回401状态码来判断`access_token`和`refresh_token`是否过期。
 
