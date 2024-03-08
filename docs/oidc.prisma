@@ -1,0 +1,70 @@
+/// 短信配置表，当前仅支持阿里云短信，若想正常发短信，需要去修改里面的 appid和appscret
+model provider {
+  owner         String   @db.VarChar(100)
+  name          String   @unique(map: "UQE_provider_name") @db.VarChar(100)
+  created_at    DateTime
+  type          String?  @db.VarChar(100)
+  client_id     String   @db.VarChar(100)
+  client_secret String   @db.VarChar(2000)
+  sign_name     String?  @db.VarChar(100)
+  template_code String?  @db.VarChar(100)
+
+  @@id([owner, name])
+}
+
+/// 颁发的令牌表
+model token {
+  id                  Int       @id @default(autoincrement())
+  platform            String?   @db.VarChar(36)
+  user_id             String    @db.VarChar(36)
+  token               String
+  created_at          DateTime
+  expire_time         DateTime?
+  refresh_token       String?
+  refresh_expire_time DateTime?
+  banned              Boolean?
+}
+
+/// 用户主表
+model user {
+  id            Int         @id @default(autoincrement())
+  user_id       String      @unique @db.VarChar(36)
+  avatar        String?     @db.VarChar(255)
+  created_at    DateTime
+  updated_at    DateTime?
+  name          String?     @db.VarChar(64)
+  password      String?     @db.VarChar(100)
+  password_salt String?     @db.VarChar(100)
+  password_type String?     @db.VarChar(100)
+  phone         String?     @db.VarChar(20)
+  country_code  String?     @db.VarChar(6)
+  admin_log     admin_log[]
+
+  @@index([name], map: "IDX_user_name")
+  @@index([phone], map: "IDX_user_phone")
+}
+
+/// 社交登录表
+model user_social {
+  id                Int       @id @default(autoincrement())
+  user_id           String?   @db.VarChar(36)
+  provider          String    @db.VarChar(64)
+  provider_user_id  String    @db.VarChar(64)
+  provider_platform String?   @db.VarChar(64)
+  provider_unionid  String?   @db.VarChar(64)
+  created_at        DateTime?
+
+  @@index([created_at], map: "IDX_user_social_created_at")
+}
+
+/// 验证码记录
+model verification_record {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime
+  type       String?  @db.VarChar(10)
+  user_id    String   @db.VarChar(36)
+  provider   String   @db.VarChar(100)
+  receiver   String   @db.VarChar(100)
+  code       String   @db.VarChar(10)
+  is_used    Boolean?
+}
