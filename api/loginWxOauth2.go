@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"yudai/object"
-
-	"github.com/spf13/viper"
 )
 
 const (
@@ -34,42 +32,29 @@ func init() {
 		result = &loginActionResult{
 			unionid: resp.UnionId,
 			openid:  resp.Openid,
-			data: map[string]any{
-				"access_token":  resp.AccessToken,
-				"refresh_token": resp.RefreshToken,
-				"expires_in":    resp.ExpiresIn,
-			},
+			data:    &resp,
 		}
 		return
 	}
 	wxLoginActions[oauth2Pc] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.WxLoginConfiguration {
-			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString(object.ENV_WX_PC_APP_ID),
-				AppSecret: viper.GetString(object.ENV_WX_PC_APP_SECRET),
-			}
+		configHandle: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[oauth2Pc]
 		},
 	}
 	wxLoginActions[oauth2H5] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.WxLoginConfiguration {
-			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString(object.ENV_WX_H5_APP_ID),
-				AppSecret: viper.GetString(object.ENV_WX_H5_APP_SECRET),
-			}
+		configHandle: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[oauth2H5]
 		},
 	}
 	wxLoginActions[oauth2App] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.WxLoginConfiguration {
-			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString(object.ENV_WX_APP_APP_ID),
-				AppSecret: viper.GetString(object.ENV_WX_APP_APP_SECRET),
-			}
+		configHandle: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[oauth2App]
 		},
 	}
 	authActionMap[oauth2Pc] = func(authForm *AuthForm) (user *object.User, err error) {

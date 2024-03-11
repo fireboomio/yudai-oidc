@@ -1,11 +1,9 @@
 mysql:
-  host: "localhost"
-  port: 3306
+  host: "192.168.211.213"
+  port: 32045
   user: "root"
-  password: "123456"
-  dbname: "oidc123"
-  max_open_conns: 200
-  max_idle_conns: 50
+  password: "5SrWNpx5NQ"
+  dbname: "oidc1"
 system:
   port: 9825
 wxlogin:

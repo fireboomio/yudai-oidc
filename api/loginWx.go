@@ -13,13 +13,13 @@ import (
 type (
 	loginAction struct {
 		url          string
-		configHandle func() *object.WxLoginConfiguration
+		configHandle func() *object.LoginConfiguration
 		respHandle   func([]byte) (*loginActionResult, error)
 	}
 	loginActionResult struct {
 		openid  string
 		unionid string
-		data    map[string]any
+		data    any
 	}
 )
 
@@ -32,7 +32,7 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 	}
 
 	wxConfig := action.configHandle()
-	appid, secret := wxConfig.AppID, wxConfig.AppSecret
+	appid, secret := wxConfig.Appid, wxConfig.Secret
 	resp, err := http.Get(fmt.Sprintf(action.url, appid, secret, code))
 	if err != nil {
 		return

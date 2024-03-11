@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"yudai/object"
-
-	"github.com/spf13/viper"
 )
 
 const (
@@ -21,11 +19,8 @@ type jscodeResp struct {
 func init() {
 	wxLoginActions[mini] = &loginAction{
 		url: jscodeUrl,
-		configHandle: func() *object.WxLoginConfiguration {
-			return &object.WxLoginConfiguration{
-				AppID:     viper.GetString(object.ENV_WX_MINI_APP_ID),
-				AppSecret: viper.GetString(object.ENV_WX_MINI_APP_SECRET),
-			}
+		configHandle: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[mini]
 		},
 		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
 			var resp jscodeResp
@@ -36,9 +31,7 @@ func init() {
 			result = &loginActionResult{
 				unionid: resp.UnionId,
 				openid:  resp.Openid,
-				data: map[string]any{
-					"session_key": resp.SessionKey,
-				},
+				data:    &resp,
 			}
 			return
 		},
