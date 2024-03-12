@@ -1,9 +1,9 @@
 mysql:
-  host: "192.168.211.213"
-  port: 32045
+  host: "localhost"
+  port: 3306
   user: "root"
-  password: "5SrWNpx5NQ"
-  dbname: "oidc1"
+  password: "123456"
+  dbname: "oidc"
 system:
   port: 9825
 wxlogin:
@@ -17,5 +17,18 @@ wxlogin:
     appid: "appid"
     secret: "secret"
   mini:
+    appid: "appid"
+    secret: "secret"
+dylogin:
+  dy_h5:
+    appid: "appid"
+    secret: "secret"
+  dy_pc:
+    appid: "appid"
+    secret: "secret"
+  dy_app:
+    appid: "appid"
+    secret: "secret"
+  dy_mini:
     appid: "appid"
     secret: "secret"

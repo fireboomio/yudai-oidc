@@ -63,7 +63,12 @@ func Login(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	user, err := authActionMap[authForm.LoginType](authForm)
+	action, ok := authActionMap[authForm.LoginType]
+	if !ok {
+		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("不支持的登录类型：%s", authForm.LoginType)})
+	}
+
+	user, err := action(authForm)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}

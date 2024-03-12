@@ -13,6 +13,7 @@ import (
 type (
 	loginAction struct {
 		url          string
+		bodyFormat   string
 		configHandle func() *object.LoginConfiguration
 		respHandle   func([]byte) (*loginActionResult, error)
 	}

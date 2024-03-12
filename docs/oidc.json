@@ -185,7 +185,11 @@
                       "mini",
                       "app",
                       "h5",
-                      "web"
+                      "pc",
+                      "dy_mini",
+                      "dy_app",
+                      "dy_h5",
+                      "dy_pc"
                     ]
                   },
                   "username": {
