@@ -136,8 +136,10 @@ func UpdateUser(c echo.Context) (err error) {
 					changeUserToken, _ = object.GenerateToken(existedPhoneUser.Transform(), updatedUser.PlatformConfig)
 				}
 			}
-			if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
-				return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+			if updatedUser.Code != "" {
+				if err = checkAndDisableCode(updatedUser.Phone, updatedUser.Code, updatedUser.CountryCode); err != nil {
+					return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
+				}
 			}
 		}
 	}
