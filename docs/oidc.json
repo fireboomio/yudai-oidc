@@ -369,7 +369,7 @@
         }
       }
     },
-    "/api/user-info": {
+    "/api/userinfo": {
       "get": {
         "operationId": "userInfo",
         "tags": [
