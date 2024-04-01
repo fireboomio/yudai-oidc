@@ -90,7 +90,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
+                  "$ref": "#/components/schemas/APIResponse"
                 }
               }
             }
@@ -414,6 +414,9 @@
           },
           "code": {
             "type": "integer"
+          },
+          "success": {
+            "type": "boolean"
           },
           "data": {}
         }
