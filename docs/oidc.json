@@ -144,6 +144,9 @@
                   },
                   "exclusive": {
                     "type": "boolean"
+                  },
+                  "userId": {
+                    "type": "string"
                   }
                 }
               }

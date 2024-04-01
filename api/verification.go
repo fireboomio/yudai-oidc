@@ -77,5 +77,5 @@ func SendVerificationCode(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, Response{Msg: "ok", Code: http.StatusOK})
+	return c.JSON(http.StatusOK, Response{Success: true, Msg: "ok", Code: http.StatusOK})
 }

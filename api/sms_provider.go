@@ -31,7 +31,8 @@ func UpdateSmsProvider(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, Response{
-		Code: http.StatusOK,
-		Msg:  fmt.Sprintf("affected:%d ", affected),
+		Success: true,
+		Code:    http.StatusOK,
+		Msg:     fmt.Sprintf("affected:%d ", affected),
 	})
 }

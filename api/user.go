@@ -50,9 +50,10 @@ func AddUser(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, Response{
-		Code: http.StatusOK,
-		Msg:  fmt.Sprintf("affected:%d ", affected),
-		Data: userId,
+		Success: true,
+		Code:    http.StatusOK,
+		Msg:     fmt.Sprintf("affected:%d ", affected),
+		Data:    userId,
 	})
 }
 
@@ -165,20 +166,21 @@ func UpdateUser(c echo.Context) (err error) {
 func IsUserExistsByPhone(c echo.Context) (err error) {
 	var user object.User
 	if err = c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, UserResponse{Msg: err.Error()})
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
 	_, exist, err := object.GetUserByPhone(user.Phone)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, UserResponse{Msg: err.Error()})
+		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
 	if !exist {
-		return c.JSON(http.StatusBadRequest, UserResponse{Msg: "用户不存在"})
+		return c.JSON(http.StatusBadRequest, Response{Msg: "用户不存在"})
 	}
 
-	return c.JSON(http.StatusOK, UserResponse{
+	return c.JSON(http.StatusOK, Response{
 		Success: true,
 		Code:    http.StatusOK,
+		Data:    user.UserId,
 	})
 }

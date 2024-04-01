@@ -22,9 +22,10 @@ type (
 	}
 
 	Response struct {
-		Msg  string `json:"msg"`
-		Code int    `json:"code"`
-		Data any    `json:"data,omitempty"`
+		Msg     string `json:"msg"`
+		Code    int    `json:"code"`
+		Success bool   `json:"success"`
+		Data    any    `json:"data,omitempty"`
 	}
 	UserResponse struct {
 		Msg     string           `json:"msg"`
