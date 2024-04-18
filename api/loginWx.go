@@ -33,6 +33,10 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 	}
 
 	wxConfig := action.configHandle()
+	if wxConfig == nil {
+		err = fmt.Errorf("not config appid/secret for [%s]", actionType)
+		return
+	}
 	appid, secret := wxConfig.Appid, wxConfig.Secret
 	resp, err := http.Get(fmt.Sprintf(action.url, appid, secret, code))
 	if err != nil {
