@@ -15,8 +15,8 @@ func init() {
 	dyLoginActions[dyMini] = &loginAction{
 		url:        dyJscodeUrl,
 		bodyFormat: dyJscodeBodyFormat,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.DyLogin[dyMini]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.DyLogin[dyMini], nil
 		},
 		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
 			var resp jscodeResp

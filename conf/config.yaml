@@ -13,6 +13,9 @@ wxlogin:
   pc:
     appid: "appid"
     secret: "secret"
+  qy_pc:
+    appid: "appid"
+    secret: "secret"
   app:
     appid: "appid"
     secret: "secret"

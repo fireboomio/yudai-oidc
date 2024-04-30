@@ -39,22 +39,22 @@ func init() {
 	wxLoginActions[oauth2Pc] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.WxLogin[oauth2Pc]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.WxLogin[oauth2Pc], nil
 		},
 	}
 	wxLoginActions[oauth2H5] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.WxLogin[oauth2H5]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.WxLogin[oauth2H5], nil
 		},
 	}
 	wxLoginActions[oauth2App] = &loginAction{
 		url:        oauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.WxLogin[oauth2App]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.WxLogin[oauth2App], nil
 		},
 	}
 	authActionMap[oauth2Pc] = func(authForm *AuthForm) (user *object.User, err error) {

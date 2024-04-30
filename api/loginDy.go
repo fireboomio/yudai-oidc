@@ -20,7 +20,10 @@ func loginDy(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
-	dyConfig := action.configHandle()
+	dyConfig, err := action.configHandle()
+	if err != nil {
+		return
+	}
 	if dyConfig == nil {
 		err = fmt.Errorf("no config found for %s", actionType)
 		return

@@ -19,8 +19,8 @@ type jscodeResp struct {
 func init() {
 	wxLoginActions[mini] = &loginAction{
 		url: jscodeUrl,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.WxLogin[mini]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.WxLogin[mini], nil
 		},
 		respHandle: func(bytes []byte) (result *loginActionResult, err error) {
 			var resp jscodeResp

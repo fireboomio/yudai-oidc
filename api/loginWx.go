@@ -14,7 +14,7 @@ type (
 	loginAction struct {
 		url          string
 		bodyFormat   string
-		configHandle func() *object.LoginConfiguration
+		configHandle func() (*object.LoginConfiguration, error)
 		respHandle   func([]byte) (*loginActionResult, error)
 	}
 	loginActionResult struct {
@@ -32,13 +32,22 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
-	wxConfig := action.configHandle()
+	wxConfig, err := action.configHandle()
+	if err != nil {
+		return
+	}
 	if wxConfig == nil {
 		err = fmt.Errorf("not config appid/secret for [%s]", actionType)
 		return
 	}
-	appid, secret := wxConfig.Appid, wxConfig.Secret
-	resp, err := http.Get(fmt.Sprintf(action.url, appid, secret, code))
+
+	var formatArgs []any
+	if token := wxConfig.AccessToken; token != "" {
+		formatArgs = append(formatArgs, token)
+	} else {
+		formatArgs = append(formatArgs, wxConfig.Appid, wxConfig.Secret)
+	}
+	resp, err := http.Get(fmt.Sprintf(action.url, append(formatArgs, code)...))
 	if err != nil {
 		return
 	}

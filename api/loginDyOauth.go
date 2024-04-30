@@ -45,22 +45,22 @@ func init() {
 	wxLoginActions[dyOauthPc] = &loginAction{
 		url:        dyOauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.DyLogin[dyOauthPc]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.DyLogin[dyOauthPc], nil
 		},
 	}
 	wxLoginActions[dyOauthH5] = &loginAction{
 		url:        dyOauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.DyLogin[dyOauthH5]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.DyLogin[dyOauthH5], nil
 		},
 	}
 	wxLoginActions[dyOauthApp] = &loginAction{
 		url:        dyOauth2Url,
 		respHandle: respHandle,
-		configHandle: func() *object.LoginConfiguration {
-			return object.Conf.DyLogin[dyOauthApp]
+		configHandle: func() (*object.LoginConfiguration, error) {
+			return object.Conf.DyLogin[dyOauthApp], nil
 		},
 	}
 	authActionMap[dyOauthPc] = func(authForm *AuthForm) (user *object.User, err error) {

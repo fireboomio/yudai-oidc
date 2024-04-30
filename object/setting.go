@@ -9,9 +9,9 @@ import (
 
 type (
 	Configuration struct {
-		System  SystemConfig      `mapstructure:"system"`
-		WxLogin DatasourceConfigs `mapstructure:"wxlogin"`
-		DyLogin DatasourceConfigs `mapstructure:"dylogin"`
+		System  SystemConfig        `mapstructure:"system"`
+		WxLogin LoginConfigurations `mapstructure:"wxlogin"`
+		DyLogin LoginConfigurations `mapstructure:"dylogin"`
 
 		Mysql         *DatasourceConfig `mapstructure:"mysql"`
 		Postgres      *DatasourceConfig `mapstructure:"postgres"`
@@ -23,17 +23,18 @@ type (
 	SystemConfig struct {
 		Port int `mapstructure:"port"`
 	}
-	DatasourceConfigs map[string]*LoginConfiguration
-	DatasourceConfig  struct {
+	DatasourceConfig struct {
 		Host     string `mapstructure:"host"`
 		Port     int    `mapstructure:"port"`
 		User     string `mapstructure:"user"`
 		Password string `mapstructure:"password"`
 		Dbname   string `mapstructure:"dbname"`
 	}
-	LoginConfiguration struct {
-		Appid  string `mapstructure:"appid"`
-		Secret string `mapstructure:"secret"`
+	LoginConfigurations map[string]*LoginConfiguration
+	LoginConfiguration  struct {
+		Appid       string `mapstructure:"appid"`
+		Secret      string `mapstructure:"secret"`
+		AccessToken string `mapstructure:"-"`
 	}
 )
 
@@ -80,17 +81,17 @@ func (c *Configuration) fromEnv() (err error) {
 
 	loginFlags := []string{"mini", "pc", "h5", "app"}
 	if c.WxLogin == nil {
-		c.WxLogin = make(map[string]*LoginConfiguration)
+		c.WxLogin = LoginConfigurations{}
 	}
 	if c.DyLogin == nil {
-		c.DyLogin = make(map[string]*LoginConfiguration)
+		c.DyLogin = LoginConfigurations{}
 	}
-	c.WxLogin.fromEnv("wx", false, loginFlags...)
+	c.WxLogin.fromEnv("wx", false, append(loginFlags, "qy_pc")...)
 	c.DyLogin.fromEnv("dy", true, loginFlags...)
 	return
 }
 
-func (c DatasourceConfigs) fromEnv(prefix string, prependPrefix bool, flag ...string) {
+func (c LoginConfigurations) fromEnv(prefix string, prependPrefix bool, flag ...string) {
 	for _, item := range flag {
 		conf, ok := makeLoginConfiguration(prefix, item)
 		if !ok {
