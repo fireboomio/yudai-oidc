@@ -57,8 +57,8 @@ func loginWx(actionType, code string) (user *object.User, err error) {
 		return
 	}
 
-	if errmsg := jsoniter.Get(respBody, "errmsg").ToString(); len(errmsg) > 0 {
-		err = errors.New(errmsg)
+	if errcode := jsoniter.Get(respBody, "errcode").ToInt(); errcode > 0 {
+		err = errors.New(jsoniter.Get(respBody, "errmsg").ToString())
 		return
 	}
 
