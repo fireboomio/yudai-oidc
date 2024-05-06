@@ -77,7 +77,12 @@ func init() {
 			return
 		},
 	}
-	authActionMap[qyPc] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginWx(qyPc, authForm.Code)
+	authActionMap[qyPc] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginWx(qyPc, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[qyPc]
+		},
 	}
 }

@@ -63,13 +63,28 @@ func init() {
 			return object.Conf.DyLogin[dyOauthApp], nil
 		},
 	}
-	authActionMap[dyOauthPc] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginDy(dyOauthPc, authForm.Code)
+	authActionMap[dyOauthPc] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginDy(dyOauthPc, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.DyLogin[dyOauthPc]
+		},
 	}
-	authActionMap[dyOauthH5] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginDy(dyOauthH5, authForm.Code)
+	authActionMap[dyOauthH5] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginDy(dyOauthH5, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.DyLogin[dyOauthH5]
+		},
 	}
-	authActionMap[dyOauthApp] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginDy(dyOauthApp, authForm.Code)
+	authActionMap[dyOauthApp] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginDy(dyOauthApp, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.DyLogin[dyOauthApp]
+		},
 	}
 }

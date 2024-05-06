@@ -9,8 +9,11 @@ import (
 )
 
 type (
-	authAction func(authForm *AuthForm) (user *object.User, err error)
-	AuthForm   struct {
+	authAction struct {
+		action  func(authForm *AuthForm) (user *object.User, err error)
+		setting func() *object.LoginConfiguration
+	}
+	AuthForm struct {
 		object.PlatformConfig
 		LoginType string `json:"loginType"`
 
@@ -39,11 +42,7 @@ type (
 	}
 )
 
-var authActionMap map[string]authAction
-
-func init() {
-	authActionMap = make(map[string]authAction)
-}
+var authActionMap = make(map[string]*authAction)
 
 // Login ...
 //
@@ -69,7 +68,7 @@ func Login(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("不支持的登录类型：%s", authForm.LoginType)})
 	}
 
-	user, err := action(authForm)
+	user, err := action.action(authForm)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
@@ -83,6 +82,21 @@ func Login(c echo.Context) (err error) {
 		Msg:     "Login Success",
 		Success: true,
 		Data:    tokenRes,
+		Code:    http.StatusOK,
+	})
+}
+
+func LoginSetting(c echo.Context) (err error) {
+	loginType := c.QueryParam("loginType")
+	action, ok := authActionMap[loginType]
+	if !ok || action.setting == nil {
+		return c.JSON(http.StatusBadRequest, Response{Msg: fmt.Sprintf("不支持获取登录配置：%s", loginType)})
+	}
+
+	return c.JSON(http.StatusOK, &Response{
+		Msg:     "Get Success",
+		Success: true,
+		Data:    action.setting(),
 		Code:    http.StatusOK,
 	})
 }

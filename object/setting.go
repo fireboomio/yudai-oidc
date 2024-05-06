@@ -32,9 +32,10 @@ type (
 	}
 	LoginConfigurations map[string]*LoginConfiguration
 	LoginConfiguration  struct {
-		Appid       string `mapstructure:"appid"`
-		Secret      string `mapstructure:"secret"`
-		AccessToken string `mapstructure:"-"`
+		Appid       string `mapstructure:"appid" json:"appid"`
+		Agentid     string `mapstructure:"agentid" json:"agentid"`
+		Secret      string `mapstructure:"secret" json:"-"`
+		AccessToken string `mapstructure:"-" json:"-"`
 	}
 )
 
@@ -110,8 +111,9 @@ func makeLoginConfiguration(prefix, flag string) (conf *LoginConfiguration, ok b
 	secret := viper.GetString(fmt.Sprintf("%s_%s_secret", prefix, flag))
 	if appid != "" && secret != "" {
 		conf, ok = &LoginConfiguration{
-			Appid:  appid,
-			Secret: secret,
+			Appid:   appid,
+			Agentid: viper.GetString(fmt.Sprintf("%s_%s_agentid", prefix, flag)),
+			Secret:  secret,
 		}, true
 	}
 	return

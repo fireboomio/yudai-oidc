@@ -57,13 +57,28 @@ func init() {
 			return object.Conf.WxLogin[oauth2App], nil
 		},
 	}
-	authActionMap[oauth2Pc] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginWx(oauth2Pc, authForm.Code)
+	authActionMap[oauth2Pc] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginWx(oauth2Pc, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[oauth2Pc]
+		},
 	}
-	authActionMap[oauth2H5] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginWx(oauth2H5, authForm.Code)
+	authActionMap[oauth2H5] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginWx(oauth2H5, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[oauth2H5]
+		},
 	}
-	authActionMap[oauth2App] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginWx(oauth2App, authForm.Code)
+	authActionMap[oauth2App] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginWx(oauth2App, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[oauth2App]
+		},
 	}
 }

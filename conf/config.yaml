@@ -15,6 +15,7 @@ wxlogin:
     secret: "secret"
   qy_pc:
     appid: "appid"
+    agentid: "agentid"
     secret: "secret"
   app:
     appid: "appid"

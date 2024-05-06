@@ -34,7 +34,12 @@ func init() {
 			return
 		},
 	}
-	authActionMap[dyMini] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginDy(dyMini, authForm.Code)
+	authActionMap[dyMini] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginDy(dyMini, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.DyLogin[dyMini]
+		},
 	}
 }

@@ -36,7 +36,12 @@ func init() {
 			return
 		},
 	}
-	authActionMap[mini] = func(authForm *AuthForm) (user *object.User, err error) {
-		return loginWx(mini, authForm.Code)
+	authActionMap[mini] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			return loginWx(mini, authForm.Code)
+		},
+		setting: func() *object.LoginConfiguration {
+			return object.Conf.WxLogin[mini]
+		},
 	}
 }

@@ -43,6 +43,7 @@ func NewRouter() *echo.Echo {
 	})
 
 	e.POST("/api/login", api.Login)
+	e.GET("/api/login/setting", api.LoginSetting)
 
 	e.POST("/api/register", api.AddUser)
 

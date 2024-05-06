@@ -189,6 +189,7 @@
                       "app",
                       "h5",
                       "pc",
+                      "qy_pc",
                       "dy_mini",
                       "dy_app",
                       "dy_h5",
@@ -228,6 +229,48 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/setting": {
+      "get": {
+        "operationId": "loginSetting",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login user configuration",
+        "parameters": [
+          {
+            "name": "loginType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mini",
+                "app",
+                "h5",
+                "pc",
+                "qy_pc",
+                "dy_mini",
+                "dy_app",
+                "dy_h5",
+                "dy_pc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSettingResponse"
                 }
               }
             }
@@ -419,6 +462,34 @@
             "type": "boolean"
           },
           "data": {}
+        }
+      },
+      "LoginSettingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/LoginConfiguration"
+          },
+          "msg": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "LoginConfiguration": {
+        "type": "object",
+        "properties": {
+          "appid": {
+            "type": "string"
+          },
+          "agentid": {
+            "type": "string"
+          }
         }
       },
       "UserResponse": {

@@ -10,19 +10,21 @@ const SMS = "sms"
 
 func init() {
 	// 通过手机短信验证码登录
-	authActionMap[SMS] = func(authForm *AuthForm) (user *object.User, err error) {
-		user, existed, err := object.GetUserByPhone(authForm.Phone)
-		if err != nil {
-			return
-		}
+	authActionMap[SMS] = &authAction{
+		action: func(authForm *AuthForm) (user *object.User, err error) {
+			user, existed, err := object.GetUserByPhone(authForm.Phone)
+			if err != nil {
+				return
+			}
 
-		if !existed {
-			err = fmt.Errorf("手机号不存在: %s", authForm.Phone)
-			return
-		}
+			if !existed {
+				err = fmt.Errorf("手机号不存在: %s", authForm.Phone)
+				return
+			}
 
-		err = checkAndDisableCode(authForm.Phone, authForm.Code, user.CountryCode)
-		return
+			err = checkAndDisableCode(authForm.Phone, authForm.Code, user.CountryCode)
+			return
+		},
 	}
 }
 
