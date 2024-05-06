@@ -44,13 +44,14 @@ func AddUser(c echo.Context) (err error) {
 		}
 	}
 
+	if user.SocialUserId != "" {
+		user.UserId = user.SocialUserId
+		_, _ = object.UpdateUserSocial(user.UserId, user.UserId)
+	}
+
 	affected, userId, err := object.AddUser(&user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
-	}
-
-	if user.SocialUserId != "" && user.SocialUserId == user.UserId {
-		_, _ = object.UpdateUserSocial(user.UserId, user.UserId)
 	}
 
 	return c.JSON(http.StatusOK, Response{
