@@ -49,6 +49,10 @@ func AddUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
+	if user.SocialUserId != "" && user.SocialUserId == user.UserId {
+		_, _ = object.UpdateUserSocial(user.UserId, user.UserId)
+	}
+
 	return c.JSON(http.StatusOK, Response{
 		Success: true,
 		Code:    http.StatusOK,
