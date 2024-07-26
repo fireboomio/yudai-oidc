@@ -95,7 +95,7 @@ func SendVerificationCodeToPhone(user *User, provider *Provider, remoteAddr stri
 	}
 
 	code := getRandomCode(6)
-	if err := SendSms(provider, code, dest); err != nil {
+	if err := SendSmsCode(provider, code, dest); err != nil {
 		return err
 	}
 

@@ -54,6 +54,7 @@ func NewRouter() *echo.Echo {
 	e.POST("/api/refresh-token", api.RefreshToken)
 
 	e.POST("/api/send-verification-code", api.SendVerificationCode)
+	e.POST("/api/send-message", api.SendSmsMessage)
 
 	e.GET("/.well-known/openid-configuration", api.GetOidcDiscovery)
 

@@ -17,7 +17,13 @@ func getSmsClient(provider *Provider) (sender.SmsClient, error) {
 	return client, nil
 }
 
-func SendSms(provider *Provider, content string, phoneNumbers ...string) error {
+func SendSmsCode(provider *Provider, content string, phoneNumbers ...string) error {
+	params := map[string]string{}
+	params["code"] = content
+	return SendSms(provider, params, phoneNumbers...)
+}
+
+func SendSms(provider *Provider, params map[string]string, phoneNumbers ...string) error {
 	client, err := getSmsClient(provider)
 	if err != nil {
 		return err
@@ -26,10 +32,6 @@ func SendSms(provider *Provider, content string, phoneNumbers ...string) error {
 	for i, number := range phoneNumbers {
 		phoneNumbers[i] = strings.TrimPrefix(number, "+86")
 	}
-
-	params := map[string]string{}
-
-	params["code"] = content
 
 	err = client.SendMessage(params, phoneNumbers...)
 	return err
