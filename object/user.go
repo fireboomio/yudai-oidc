@@ -105,7 +105,7 @@ func GetUserByPhone(phone string) (*User, bool, error) {
 
 func GetUserMapByPhones(phone []string) (userMap map[string]*User, err error) {
 	var users []*User
-	if err = engine.In("provider", phone).Find(&users); err != nil {
+	if err = engine.In("phone", phone).Find(&users); err != nil {
 		return
 	}
 	userMap = make(map[string]*User, len(users))
