@@ -103,6 +103,18 @@ func GetUserByPhone(phone string) (*User, bool, error) {
 	return &user, existed, err
 }
 
+func GetUserMapByPhones(phone []string) (userMap map[string]*User, err error) {
+	var users []*User
+	if err = engine.In("provider", phone).Find(&users); err != nil {
+		return
+	}
+	userMap = make(map[string]*User, len(users))
+	for _, item := range users {
+		userMap[item.Phone] = item
+	}
+	return
+}
+
 func GetUserByUserId(userId string) (*User, bool, error) {
 	if userId == "" {
 		return nil, false, errors.New("用户ID为空")
