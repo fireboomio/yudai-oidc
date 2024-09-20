@@ -3,6 +3,8 @@ package object
 import (
 	"errors"
 	"fmt"
+	"github.com/spf13/cast"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -40,6 +42,10 @@ type Token struct {
 func GenerateToken(userinfo *Userinfo, platform PlatformConfig) (res *TokenRes, err error) {
 	// Create the Claims
 	nowTime := time.Now()
+	if offsetSecondsValue := os.Getenv("token_time_offset_seconds"); offsetSecondsValue != "" {
+		offset := time.Duration(cast.ToInt(offsetSecondsValue))
+		nowTime = nowTime.Add(offset * time.Second)
+	}
 	expireAt := nowTime.Add(24 * time.Hour)
 
 	claims := Claims{
