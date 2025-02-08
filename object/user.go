@@ -98,9 +98,7 @@ func GetUserByPhone(phone string) (*User, bool, error) {
 		return nil, false, errors.New("手机号码为空")
 	}
 
-	user := User{Phone: phone}
-	existed, err := engine.Get(&user)
-	return &user, existed, err
+	return GetUser(User{Phone: phone})
 }
 
 func GetUserMapByPhones(phone []string) (userMap map[string]*User, err error) {
@@ -120,7 +118,10 @@ func GetUserByUserId(userId string) (*User, bool, error) {
 		return nil, false, errors.New("用户ID为空")
 	}
 
-	user := User{UserId: userId}
+	return GetUser(User{UserId: userId})
+}
+
+func GetUser(user User) (*User, bool, error) {
 	existed, err := engine.Get(&user)
 	return &user, existed, err
 }
@@ -142,10 +143,7 @@ func GetUserByName(name string) (user *User, existed bool, err error) {
 		return
 	}
 
-	queryUser := User{Name: name}
-	existed, err = engine.Get(&queryUser)
-	user = &queryUser
-	return
+	return GetUser(User{Name: name})
 }
 
 func CheckUserPassword(name, password string) (user *User, err error) {
