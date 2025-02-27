@@ -49,7 +49,7 @@ func NewRouter() *echo.Echo {
 
 	e.POST("/api/add-user", api.AddUser)
 
-	e.POST("/api/isUserExist", api.IsUserExistsByPhone)
+	e.POST("/api/isUserExist", api.IsUserExists)
 
 	e.POST("/api/refresh-token", api.RefreshToken)
 

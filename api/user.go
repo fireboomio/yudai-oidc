@@ -168,7 +168,7 @@ func UpdateUser(c echo.Context) (err error) {
 
 }
 
-func IsUserExistsByPhone(c echo.Context) (err error) {
+func IsUserExists(c echo.Context) (err error) {
 	var user object.User
 	if err = c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
