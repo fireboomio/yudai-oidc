@@ -174,6 +174,10 @@ func IsUserExists(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
+	if user.Phone == "" && user.Name == "" {
+		return c.JSON(http.StatusBadRequest, Response{Msg: "手机号或用户名不能为空"})
+	}
+
 	existedUser, exist, err := object.GetUser(object.User{Phone: user.Phone, Name: user.Name})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
