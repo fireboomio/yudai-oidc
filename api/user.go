@@ -174,7 +174,7 @@ func IsUserExists(c echo.Context) (err error) {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
 
-	existedUser, exist, err := object.GetUser(user)
+	existedUser, exist, err := object.GetUser(object.User{Phone: user.Phone, Name: user.Name})
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Msg: err.Error()})
 	}
