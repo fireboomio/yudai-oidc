@@ -46,7 +46,11 @@ func GenerateToken(userinfo *Userinfo, platform PlatformConfig) (res *TokenRes, 
 		offset := time.Duration(cast.ToInt(offsetSecondsValue))
 		nowTime = nowTime.Add(offset * time.Second)
 	}
-	expireAt := nowTime.Add(24 * time.Hour)
+	expireHours := 24
+	if tokenExpireHours := os.Getenv("token_expire_hours"); tokenExpireHours != "" {
+		expireHours = cast.ToInt(tokenExpireHours)
+	}
+	expireAt := nowTime.Add(time.Duration(expireHours) * time.Hour)
 
 	claims := Claims{
 		User:      userinfo,
@@ -62,7 +66,14 @@ func GenerateToken(userinfo *Userinfo, platform PlatformConfig) (res *TokenRes, 
 
 	var token *jwt.Token
 	var refreshToken *jwt.Token
-	refreshExpireTime := nowTime.Add(7 * 24 * time.Hour)
+	refreshExpireHours := 7 * 24
+	if refreshTokenExpireHours := os.Getenv("refresh_token_expire_hours"); refreshTokenExpireHours != "" {
+		refreshExpireHours = cast.ToInt(refreshTokenExpireHours)
+	}
+	if refreshExpireHours < expireHours {
+		refreshExpireHours = expireHours
+	}
+	refreshExpireTime := nowTime.Add(time.Duration(refreshExpireHours) * time.Hour)
 
 	token = jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
